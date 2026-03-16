@@ -75,7 +75,7 @@ export class RuleNodePanel {
   /** "Select field" input in IF condition row (first in rule panel) */
   private get conditionFieldInput(): Locator {
     return this.page.getByPlaceholder(/select\s*field/i).first()
-      .or(this.page.getByRole('combobox', { name: /field|variable/i }).first());
+    .or(this.page.getByRole('combobox', { name: /field|variable/i }).first());
   }
 
   /** "Enter value" input in IF condition row (first in rule panel) */
