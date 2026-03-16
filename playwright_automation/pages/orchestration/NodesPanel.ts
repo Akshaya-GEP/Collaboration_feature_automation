@@ -21,7 +21,7 @@ export class NodesPanel {
 
 
   async addNode(
-    nodeType: 'LLM' | 'Agent' | 'Guardrail' | 'Rule' | 'Variable' | 'Output'
+    nodeType: 'LLM' | 'Agent' | 'Guardrail' | 'Rule' | 'Variable' | 'Output' | 'Script' | 'API'
   ) {
     console.log(`Adding ${nodeType} node...`);
     
@@ -51,8 +51,12 @@ export class NodesPanel {
     }
     
     // Step 3: Click the node type to add it to canvas
+    const panelLabelByType: Partial<Record<typeof nodeType, string>> = {
+      API: 'HTTP Request',
+    };
+    const panelLabel = panelLabelByType[nodeType] ?? nodeType;
     const nodeElement = this.page
-      .locator(`button:has-text("${nodeType}")`)
+      .locator(`button:has-text("${panelLabel}")`)
       .first();
     
     await expect(nodeElement).toBeVisible({ timeout: 10_000 });
@@ -72,6 +76,8 @@ export class NodesPanel {
       Rule: /rule_\d+/i,
       Variable: /variable_\d+/i,
       Output: /output/i,
+      Script: /script_\d+/i,
+      API: /api_\d+/i,
     };
 
     // Prefer the newest node (last) so repeated addNode('Agent') targets agent_1, agent_2, ...

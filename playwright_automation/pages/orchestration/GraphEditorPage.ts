@@ -34,6 +34,16 @@ export class GraphEditorPage {
     return this.page.getByRole('button', { name: /llm_[\w-]+\s+llm/i }).nth(index);
   }
 
+  // Script node
+  scriptNode(index = 0): Locator {
+    return this.page.getByRole('button', { name: /script_[\w-]+\s+script/i }).nth(index);
+  }
+
+  // API (HTTP Request) node — accessible name is like "api_0 http request POST ..."
+  apiNode(index = 0): Locator {
+    return this.page.getByRole('button', { name: /api[\s_]?\d+.*http/i }).nth(index);
+  }
+
   // Guardrail node
   guardrailNode(index = 0): Locator {
     return this.page.getByRole('button', { name: /guardrail_[\w-]+\s+guardrail/i }).nth(index);
@@ -64,51 +74,69 @@ export class GraphEditorPage {
   }
 
   /**
-   * Link two nodes by dragging from source to target
-   * This simulates the visual connection drawing in the workflow editor
+   * Link two nodes by dragging from source to target.
+   * When fromPort is 'pass' or 'fail', the drag starts from the actual
+   * React Flow handle element (data-handleid="pass" / "fail") so the
+   * connection attaches to the correct port.
    */
   async linkNodes(
     fromNode: Locator,
     toNode: Locator,
     options?: { fromPort?: 'default' | 'pass' | 'fail' }
   ) {
-    console.log('Creating connection between nodes...');
-    
-    // Wait for both nodes to be visible
+    const port = options?.fromPort ?? 'default';
+    console.log(`Creating connection (port: ${port})...`);
+
     await expect(fromNode).toBeVisible({ timeout: 10_000 });
     await expect(toNode).toBeVisible({ timeout: 10_000 });
-    
-    // Get bounding boxes to find connection points
-    const fromBox = await fromNode.boundingBox();
-    const toBox = await toNode.boundingBox();
-    
-    if (!fromBox || !toBox) {
-      throw new Error('Could not get node positions for linking');
+
+    let fromX: number;
+    let fromY: number;
+
+    if (port === 'pass' || port === 'fail') {
+      // Locate the exact React Flow handle element inside (or next to) the node
+      const handle = fromNode.locator(`[data-handleid="${port}"]`).first();
+      const handleVisible = await handle.isVisible({ timeout: 3_000 }).catch(() => false);
+
+      if (handleVisible) {
+        const hBox = await handle.boundingBox();
+        if (hBox) {
+          fromX = hBox.x + hBox.width / 2;
+          fromY = hBox.y + hBox.height / 2;
+          console.log(`  Using handle element for port "${port}" at (${fromX}, ${fromY})`);
+        } else {
+          throw new Error(`Handle "${port}" found but has no bounding box`);
+        }
+      } else {
+        // Fallback: percentage-based offset on the node box
+        const fromBox = await fromNode.boundingBox();
+        if (!fromBox) throw new Error('Could not get source node position');
+        fromX = fromBox.x + fromBox.width;
+        const yOffset = port === 'pass' ? 0.35 : 0.65;
+        fromY = fromBox.y + fromBox.height * yOffset;
+        console.log(`  Handle element not found; using fallback offset for "${port}"`);
+      }
+    } else {
+      const fromBox = await fromNode.boundingBox();
+      if (!fromBox) throw new Error('Could not get source node position');
+      fromX = fromBox.x + fromBox.width;
+      fromY = fromBox.y + fromBox.height * 0.5;
     }
-    
-    // Calculate connection points (right edge of source, left edge of target)
-    const fromX = fromBox.x + fromBox.width; // Right edge of source node
-    const port = options?.fromPort ?? 'default';
-    const fromYOffset =
-      port === 'pass' ? 0.25 : port === 'fail' ? 0.75 : 0.5; // aim at different handles
-    const fromY = fromBox.y + fromBox.height * fromYOffset;
-    
-    const toX = toBox.x;  // Left edge of target node
-    const toY = toBox.y + toBox.height / 2;  // Middle of target node
-    
-    // Perform drag operation to create connection
+
+    const toBox = await toNode.boundingBox();
+    if (!toBox) throw new Error('Could not get target node position');
+    const toX = toBox.x;
+    const toY = toBox.y + toBox.height / 2;
+
     await this.page.mouse.move(fromX, fromY);
     await this.page.waitForTimeout(300);
-    
     await this.page.mouse.down();
     await this.page.waitForTimeout(300);
-    
     await this.page.mouse.move(toX, toY, { steps: 10 });
     await this.page.waitForTimeout(300);
-    
     await this.page.mouse.up();
     await this.page.waitForTimeout(500);
-    
+
     console.log('✅ Connection created');
   }
 
