@@ -123,7 +123,7 @@ test.describe('Collaboration - Rule Node, two browsers', () => {
       await deleteInFirstRow.hover();
       await pageA.waitForTimeout(300);
       await deleteInFirstRow.click();
-      await pageA.waitForTimeout(500);
+      await pageA.waitForTimeout(400);
       await expect(pageA.getByRole('dialog', { name: /delete draft/i })).toBeVisible({ timeout: 5_000 });
       await pageA.getByRole('button', { name: /delete draft/i }).click();
       await pageA.waitForTimeout(500);
