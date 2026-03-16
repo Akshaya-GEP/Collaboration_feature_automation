@@ -121,6 +121,15 @@ test.describe('Collaboration API - two browsers, same canvas', () => {
       await pageA.waitForTimeout(1000);
 
       const firstRowA = pageA.locator('table tbody tr').first();
+      const deleteInFirstRow = firstRowA.locator('button').filter({ has: pageA.locator('svg.lucide-trash2') }).first();
+      await deleteInFirstRow.hover();
+      await pageA.waitForTimeout(300);
+      await deleteInFirstRow.click();
+      await pageA.waitForTimeout(500);
+      await expect(pageA.getByRole('dialog', { name: /delete draft/i })).toBeVisible({ timeout: 5_000 });
+      await pageA.getByRole('button', { name: /delete draft/i }).click();
+      await pageA.waitForTimeout(500);
+
       const eyeA = firstRowA.locator('button').filter({ has: pageA.locator('svg.lucide-eye') });
       await expect(eyeA.first()).toBeVisible({ timeout: 10_000 });
       await eyeA.first().hover();
