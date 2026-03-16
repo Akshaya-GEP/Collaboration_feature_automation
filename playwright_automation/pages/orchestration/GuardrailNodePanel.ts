@@ -145,6 +145,29 @@ export class GuardrailNodePanel {
     }
   }
 
+  /**
+   * Assert that the Input value is visible in the panel (for collaboration sync check in Browser B).
+   */
+  async expectInputValue(value: string): Promise<void> {
+    await expect(this.page.getByText(value)).toBeVisible({ timeout: 15_000 });
+    console.log(`Guardrail: input value reflected: ${value}`);
+  }
+
+  /**
+   * Assert that the "Personally identifiable information" check is enabled (switch on) in the panel.
+   */
+  async expectPersonallyIdentifiableInformationEnabled(enabled = true): Promise<void> {
+    const row = this.checkRow(/personally identifiable information/i);
+    const toggle = row.getByRole('switch').first().or(row.getByRole('checkbox').first());
+    await expect(toggle).toBeVisible({ timeout: 10_000 });
+    if (enabled) {
+      await expect(toggle).toBeChecked({ timeout: 5_000 });
+    } else {
+      await expect(toggle).not.toBeChecked({ timeout: 5_000 });
+    }
+    console.log(`Guardrail: PII check reflected as ${enabled ? 'ON' : 'OFF'}`);
+  }
+
   async closePanel() {
     console.log('Closing guardrail configuration panel...');
     if (await this.closePanelButton.isVisible().catch(() => false)) {

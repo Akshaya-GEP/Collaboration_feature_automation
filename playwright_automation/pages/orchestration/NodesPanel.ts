@@ -21,7 +21,7 @@ export class NodesPanel {
 
 
   async addNode(
-    nodeType: 'LLM' | 'Agent' | 'Guardrail' | 'Rule' | 'Output'
+    nodeType: 'LLM' | 'Agent' | 'Guardrail' | 'Rule' | 'Variable' | 'Output'
   ) {
     console.log(`Adding ${nodeType} node...`);
     
@@ -70,6 +70,7 @@ export class NodesPanel {
       LLM: /llm_\d+/i,
       Guardrail: /guardrail_\d+/i,
       Rule: /rule_\d+/i,
+      Variable: /variable_\d+/i,
       Output: /output/i,
     };
 
@@ -88,5 +89,38 @@ export class NodesPanel {
     
     console.log(`✅ ${nodeType} configuration panel opened`);
     await this.page.waitForTimeout(3000); // Increased wait for config panel
+  }
+
+  /**
+   * Open nodes panel, add the given node type to the canvas (click to add), but do not open its config.
+   * Use this when you need to link the node before opening (e.g. guardrail: add → link start → guardrail → output → then open).
+   */
+  async addNodeToCanvasOnly(
+    nodeType: 'LLM' | 'Agent' | 'Guardrail' | 'Rule' | 'Variable' | 'Output'
+  ): Promise<void> {
+    console.log(`Adding ${nodeType} node to canvas (no config open)...`);
+    await this.page.waitForTimeout(1000);
+
+    const plusButton = this.page.locator('button').filter({
+      has: this.page.locator('svg'),
+    }).first();
+    await expect(plusButton).toBeVisible({ timeout: 10_000 });
+    await plusButton.click();
+    await this.page.waitForTimeout(1000);
+
+    try {
+      if (await this.nodesTab.isVisible({ timeout: 2000 })) {
+        await this.nodesTab.click();
+        await this.page.waitForTimeout(500);
+      }
+    } catch {
+      // Nodes tab not needed or already active
+    }
+
+    const nodeElement = this.page.locator(`button:has-text("${nodeType}")`).first();
+    await expect(nodeElement).toBeVisible({ timeout: 10_000 });
+    await nodeElement.click({ timeout: 5000 });
+    console.log(`✅ ${nodeType} node added to canvas`);
+    await this.page.waitForTimeout(2000);
   }
 }

@@ -45,10 +45,10 @@ export class RuleNodePanel {
     return this.page.getByText('Rule Blocks', { exact: true }).first();
   }
 
-  /** IF block card (first conditional block with "IF" and "CASE 1") */
+  /** IF block card (first conditional block with "IF" / "IF CASE 1") */
   private get ifBlock(): Locator {
-    const ifLabel = this.page.getByText('IF', { exact: true }).first();
-    return ifLabel.locator('..').locator('..').locator('..');
+    const ifLabel = this.page.getByText(/IF\s*(CASE\s*1)?/i).first();
+    return ifLabel.locator('..').locator('..').locator('..').locator('..');
   }
 
   /** ELSE block card (default block with "ELSE" and "DEFAULT") */
@@ -72,14 +72,16 @@ export class RuleNodePanel {
       .or(this.ifBlock.locator('button').filter({ hasText: /equals/i }).first());
   }
 
-  /** "Select field" input in IF condition row */
+  /** "Select field" input in IF condition row (first in rule panel) */
   private get conditionFieldInput(): Locator {
-    return this.ifBlock.getByPlaceholder('Select field').first();
+    return this.page.getByPlaceholder(/select\s*field/i).first()
+      .or(this.page.getByRole('combobox', { name: /field|variable/i }).first());
   }
 
-  /** "Enter value" input in IF condition row */
+  /** "Enter value" input in IF condition row (first in rule panel) */
   private get conditionValueInput(): Locator {
-    return this.ifBlock.getByPlaceholder('Enter value').first();
+    return this.page.getByPlaceholder(/enter\s*value/i).first()
+      .or(this.page.locator('input[placeholder*="value" i]').first());
   }
 
   /** Toggle switch inside the IF block */
@@ -130,13 +132,24 @@ export class RuleNodePanel {
 
   async setIfCondition(options: { field?: string; operator?: string; value?: string }): Promise<void> {
     await expect(this.ifBlock).toBeVisible({ timeout: 10_000 });
+    await this.ifBlock.scrollIntoViewIfNeeded();
+    await this.page.waitForTimeout(300);
 
     if (options.field !== undefined) {
-      await this.conditionFieldInput.click();
-      await this.conditionFieldInput.fill(options.field);
-      const opt = this.page.getByRole('option').filter({ hasText: new RegExp(options.field, 'i') }).first();
-      if (await opt.isVisible({ timeout: 2_000 }).catch(() => false)) await opt.click();
-      await this.page.waitForTimeout(200);
+      const fieldInput = this.conditionFieldInput;
+      await expect(fieldInput).toBeVisible({ timeout: 10_000 });
+      await fieldInput.scrollIntoViewIfNeeded();
+      await fieldInput.click();
+      await this.page.waitForTimeout(400);
+      await fieldInput.fill(options.field);
+      await this.page.waitForTimeout(500);
+      const opt = this.page.getByRole('option').filter({ hasText: options.field }).first();
+      if (await opt.isVisible({ timeout: 3_000 }).catch(() => false)) {
+        await opt.click();
+      } else {
+        await this.page.keyboard.press('Enter');
+      }
+      await this.page.waitForTimeout(300);
     }
 
     if (options.operator !== undefined) {
@@ -149,8 +162,15 @@ export class RuleNodePanel {
     }
 
     if (options.value !== undefined) {
-      await this.conditionValueInput.click();
-      await this.conditionValueInput.fill(options.value);
+      const valueInput = this.conditionValueInput;
+      await expect(valueInput).toBeVisible({ timeout: 10_000 });
+      await valueInput.scrollIntoViewIfNeeded();
+      await valueInput.click();
+      await this.page.waitForTimeout(200);
+      await valueInput.clear();
+      await valueInput.fill(options.value);
+      await this.page.waitForTimeout(300);
+      await this.ifBlock.click().catch(() => this.page.keyboard.press('Tab'));
       await this.page.waitForTimeout(200);
     }
   }
@@ -198,5 +218,16 @@ export class RuleNodePanel {
 
   async expectPanelVisible(): Promise<void> {
     await expect(this.ruleBlocksHeading).toBeVisible({ timeout: 15_000 });
+  }
+
+  /** Assert the IF condition value field shows the given value (for collab sync in Browser B). */
+  async expectIfConditionValue(expectedValue: string): Promise<void> {
+    await expect(this.conditionValueInput).toHaveValue(expectedValue, { timeout: 15_000 });
+  }
+
+  /** Assert the IF condition operator is visible (e.g. "Equals") in the IF block (for collab sync in Browser B). */
+  async expectIfConditionOperator(expectedOperator: string): Promise<void> {
+    const pattern = new RegExp(expectedOperator, 'i');
+    await expect(this.ifBlock.getByText(pattern).first()).toBeVisible({ timeout: 15_000 });
   }
 }

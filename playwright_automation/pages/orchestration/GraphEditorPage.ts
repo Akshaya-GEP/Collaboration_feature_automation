@@ -39,6 +39,16 @@ export class GraphEditorPage {
     return this.page.getByRole('button', { name: /guardrail_[\w-]+\s+guardrail/i }).nth(index);
   }
 
+  // Rule node - match button with rule_0 / rule_1 etc. (label may be "Rule" or "rule" before/after id)
+  ruleNode(index = 0): Locator {
+    return this.page.getByRole('button', { name: /rule_\d+/i }).nth(index);
+  }
+
+  // Variable node - match button with variable_0 / variable_1 etc.
+  variableNode(index = 0): Locator {
+    return this.page.getByRole('button', { name: /variable_[\w-]+\s+variable/i }).nth(index);
+  }
+
   // Output node - match button with OUTPUT text
   get outputNode(): Locator {
     return this.page.getByRole('button', { name: /OUTPUT.*output.*Final output/i });

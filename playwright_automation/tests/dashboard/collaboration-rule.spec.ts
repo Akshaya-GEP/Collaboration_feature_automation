@@ -5,29 +5,29 @@ import { configureDomain } from '../../pages/config/domainhelper';
 import { OrchestrationHomePage } from '../../pages/orchestration/OrchestrationHomePage';
 import { PropertiesPanel } from '../../pages/orchestration/PropertiesPanel';
 import { GraphEditorPage } from '../../pages/orchestration/GraphEditorPage';
-import { AgentNodePanel } from '../../pages/orchestration/AgentNodePanel';
-import { pasteWorkflowJsonFromBdd } from '../../pages/orchestration/JsonWorkflowHelper';
+import { NodesPanel } from '../../pages/orchestration/NodesPanel';
+import { RuleNodePanel } from '../../pages/orchestration/RuleNodePanel';
 import { envFirst, requireEnvOrSkip } from '../helpers/env';
 
 const appUrl = envFirst('APP_URL') ?? 'https://dev-qi.gep.com/?dc=eyJjIjoiREVWRUxPUEVSRE9NQUlOIiwiZCI6IjIwMjEwNTExIiwiZSI6IkRFViIsImEiOiJmMzAxMzFkOS0yM2VmLTQ4YjItODI2Ni1mOWIxNGUwZGNhOTYiLCJtIjoiYzM0MTRjOTQtZDg4My00MjBlLWJhMGUtNTdhZTIyNzg4NjMwIiwibiI6IkRFVkVMT1BFUkRPTUFJTiIsInYiOiJ2MTc3MzUwNzY1NzM4MzYyMTQwMCJ9';
 const skipLogin = envFirst('SKIP_LOGIN');
 const freshBrowser = envFirst('FRESH_BROWSER');
 const freshBrowserB = envFirst('FRESH_BROWSER_B');
-const workflowName = envFirst('COLLAB_WORKFLOW_NAME') ?? 'BDD AGENT';
-const workflowDescription = 'Collaboration test workflow';
-const collabWorkflowJsonPath = envFirst('COLLAB_WORKFLOW_JSON') ?? 'bdd/data/core/agent_testcase1.json';
+const workflowName = envFirst('COLLAB_RULE_WORKFLOW_NAME') ?? 'BDD RULE';
+const workflowDescription = 'Collaboration test workflow - Rule Node';
 
 const AUTH_A = 'auth.json';
 const AUTH_B = 'authB.json';
 
 /**
- * Collaboration State Update test.
- * Reuses the same flow as collaboration.spec.ts up to opening the Agent Node panel in both browsers,
- * then: expand State Update in A and B, add state update in A (variable, Append, value), save in A,
- * and assert the update appears in B.
+ * Collaboration test: two browsers, same canvas — Rule node (same flow as guardrail).
+ * - Browser A: dashboard, invite B, Create workflow, properties, close panel, Save (no JSON editor).
+ * - Browser B: login, open same canvas URL; assert start, output (rule not yet added).
+ * - Browser A: click plus (nodes panel), add Rule node, link start → rule → output, open rule node.
+ * - Browser B: rule node syncs; open rule node in both. A changes IF value and operator; changes reflect in B.
  */
-test.describe('Collaboration - State Update', () => {
-  test('collab: A adds state update; B sees it after save', async () => {
+test.describe('Collaboration - Rule Node, two browsers', () => {
+  test('collab rule: A invites B, both open same canvas; A edits rule node IF block and changes reflect in B', async () => {
     test.setTimeout(400_000);
 
     const loginUrl = envFirst('LOGIN_URL');
@@ -42,6 +42,7 @@ test.describe('Collaboration - State Update', () => {
       headless: !isHeaded,
       args: isHeaded ? ['--window-position=0,0', `--window-size=${windowSize}`] : [],
     });
+
     const browserB = await chromium.launch({
       channel: 'msedge',
       headless: !isHeaded,
@@ -89,8 +90,9 @@ test.describe('Collaboration - State Update', () => {
     const pageB = await contextB.newPage();
 
     try {
-      // ---------- Reuse: Browser A — navigate, login, domain, dashboard, invite B ----------
+      // ---------- Browser A: navigate, login, domain, dashboard, invite B ----------
       await pageA.goto(appUrl, { waitUntil: 'domcontentloaded' });
+
       if (!skipLogin) {
         const emailInputA = pageA.locator('#i0116, input[type="email"]');
         const passwordInputA = pageA.locator('#i0118, input[type="password"]').or(pageA.getByPlaceholder(/password/i));
@@ -102,6 +104,7 @@ test.describe('Collaboration - State Update', () => {
           await pageA.waitForLoadState('domcontentloaded');
         }
       }
+
       await configureDomain(pageA);
 
       const sidebarA = new Sidebar(pageA);
@@ -161,14 +164,14 @@ test.describe('Collaboration - State Update', () => {
       await pageA.getByRole('button', { name: 'Done' }).click();
       await expect(pageA.getByRole('dialog', { name: /invite collaborators/i })).toBeHidden({ timeout: 5000 });
 
-      // ---------- Reuse: Browser A — Create workflow, properties, JSON, save ----------
+      // ---------- Browser A: Create workflow, properties, close panel, Save (no JSON editor) ----------
       const orchestrationHomeA = new OrchestrationHomePage(pageA);
       await orchestrationHomeA.startGraphOrchestration();
 
       const propertiesPanelA = new PropertiesPanel(pageA);
       const name = workflowName.trim();
       const description = workflowDescription.trim();
-      test.skip(!name || !description, 'Strict: Name and Description are required (non-empty). Set COLLAB_WORKFLOW_NAME in .env if needed.');
+      test.skip(!name || !description, 'Strict: Name and Description are required. Set COLLAB_RULE_WORKFLOW_NAME in .env if needed.');
       await propertiesPanelA.fillProperties({
         name,
         description,
@@ -180,20 +183,9 @@ test.describe('Collaboration - State Update', () => {
       await pageA.getByRole('button', { name: /save/i }).click();
       await pageA.waitForTimeout(3000);
 
-      await pasteWorkflowJsonFromBdd(pageA, collabWorkflowJsonPath);
-      await pageA.getByRole('button', { name: /save/i }).click();
-      await pageA.waitForTimeout(2000);
-
-      const graphEditorABeforeB = new GraphEditorPage(pageA);
-      await graphEditorABeforeB.agentNode(0).dblclick();
-      await pageA.waitForTimeout(1500);
-      await expect(
-        pageA.getByRole('region', { name: /instructions/i }).or(pageA.getByRole('button', { name: /close panel/i })).first()
-      ).toBeVisible({ timeout: 10_000 });
-
       const workflowPageUrl = pageA.url();
 
-      // ---------- Reuse: Browser B — login, navigate to same workflow ----------
+      // ---------- Browser B: login, then open same workflow URL ----------
       await pageB.goto(appUrl, { waitUntil: 'domcontentloaded' });
       const emailInputB = pageB.locator('#i0116, input[type="email"]');
       const passwordInputB = pageB.locator('#i0118, input[type="password"]').or(pageB.getByPlaceholder(/password/i));
@@ -211,49 +203,48 @@ test.describe('Collaboration - State Update', () => {
       await pageB.waitForLoadState('load', { timeout: 15_000 }).catch(() => {});
       await pageB.waitForTimeout(2000);
 
+      // ---------- Browser B: assert canvas loaded (start, output — rule not yet added) ----------
       const graphEditorB = new GraphEditorPage(pageB);
       await expect(graphEditorB.startNode).toBeVisible({ timeout: 25_000 });
-      await expect(graphEditorB.agentNode(0)).toBeVisible({ timeout: 25_000 });
       await expect(graphEditorB.outputNode).toBeVisible({ timeout: 25_000 });
 
-      // ---------- Reuse: Open Agent Node panel in both browsers ----------
+      // ---------- Browser A: add Rule node, link start → rule → output, open rule node ----------
       const graphEditorA = new GraphEditorPage(pageA);
-      await graphEditorA.agentNode(0).dblclick();
+      const nodesPanelA = new NodesPanel(pageA);
+
+      await nodesPanelA.addNodeToCanvasOnly('Rule');
+      await pageA.waitForTimeout(1000);
+
+      const startNodeA = graphEditorA.startNode;
+      const ruleNodeA = graphEditorA.ruleNode(0);
+      const outputNodeA = graphEditorA.outputNode;
+      await graphEditorA.linkNodes(startNodeA, ruleNodeA);
+      await pageA.waitForTimeout(500);
+      await graphEditorA.linkNodes(ruleNodeA, outputNodeA);
+      await pageA.waitForTimeout(1000);
+
+      await ruleNodeA.scrollIntoViewIfNeeded();
+      await ruleNodeA.dblclick();
       await pageA.waitForTimeout(2000);
-      await expect(pageA.getByRole('region', { name: /instructions/i }).or(pageA.getByRole('button', { name: /close panel/i })).first()).toBeVisible({ timeout: 10_000 });
+      await expect(pageA.getByText('Rule Blocks').or(pageA.getByRole('button', { name: /close panel/i })).first()).toBeVisible({ timeout: 10_000 });
 
-      await graphEditorB.agentNode(0).scrollIntoViewIfNeeded();
-      await graphEditorB.agentNode(0).dblclick();
-      await expect(pageB.getByRole('region', { name: /instructions/i }).or(pageB.getByRole('button', { name: /close panel/i })).first()).toBeVisible({ timeout: 15_000 });
+      // ---------- Browser B: rule node should sync; open rule node in B ----------
+      await pageB.waitForTimeout(3000);
+      await expect(graphEditorB.ruleNode(0)).toBeVisible({ timeout: 25_000 });
+      await graphEditorB.ruleNode(0).scrollIntoViewIfNeeded();
+      await graphEditorB.ruleNode(0).dblclick();
+      await expect(pageB.getByText('Rule Blocks').or(pageB.getByRole('button', { name: /close panel/i })).first()).toBeVisible({ timeout: 15_000 });
 
-      // ---------- Step 1: Open State Update panel (expand section) in A, then in B ----------
-      const agentPanelA = new AgentNodePanel(pageA);
-      const agentPanelB = new AgentNodePanel(pageB);
+      // ---------- Browser A: set IF block — Select field "{{system.userQuery}}", Enter value "number"; reflect in B (end of flow) ----------
+      const rulePanelA = new RuleNodePanel(pageA);
+      const rulePanelB = new RuleNodePanel(pageB);
 
-      await agentPanelA.expandStateUpdateSection();
-      await agentPanelB.expandStateUpdateSection();
-
-      // ---------- Step 2: Add a State Update in Browser A ----------
-      await agentPanelA.addStateUpdate({
-        variable: '{{thread.agent_0_messages}}',
-        action: 'Append',
-        value: 'Agent 1',
+      await rulePanelA.setIfCondition({
+        field: '{{system.userQuery}}',
+        value: 'number',
       });
-
-      // ---------- Step 3: Save configuration (Browser A) ----------
-      await agentPanelA.closePanel();
-      await pageA.getByRole('button', { name: /save/i }).click();
-      await pageA.waitForTimeout(3000);
-
-      // ---------- Expected: State update from A appears in B ----------
-      await agentPanelB.expectStateUpdateVisible({
-        variable: '{{thread.agent_0_messages}}',
-        action: 'Append',
-        value: 'Agent 1',
-      });
-
-      // Wait until the update is visible in B (already asserted above); short wait to observe
-      await pageB.waitForTimeout(2000);
+      await pageA.waitForTimeout(1000);
+      await rulePanelB.expectIfConditionValue('number');
     } finally {
       await contextA.close();
       await contextB.close();
