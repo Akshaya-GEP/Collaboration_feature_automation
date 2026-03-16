@@ -21,7 +21,7 @@ export class NodesPanel {
 
 
   async addNode(
-    nodeType: 'LLM' | 'Agent' | 'Guardrail' | 'Rule' | 'Output'
+    nodeType: 'LLM' | 'Agent' | 'Guardrail' | 'Rule' | 'Output' | 'Script'
   ) {
     console.log(`Adding ${nodeType} node...`);
     
@@ -71,6 +71,7 @@ export class NodesPanel {
       Guardrail: /guardrail_\d+/i,
       Rule: /rule_\d+/i,
       Output: /output/i,
+      Script: /script_\d+/i,
     };
 
     // Prefer the newest node (last) so repeated addNode('Agent') targets agent_1, agent_2, ...

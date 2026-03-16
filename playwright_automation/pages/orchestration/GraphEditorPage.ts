@@ -34,6 +34,11 @@ export class GraphEditorPage {
     return this.page.getByRole('button', { name: /llm_[\w-]+\s+llm/i }).nth(index);
   }
 
+  // Script node
+  scriptNode(index = 0): Locator {
+    return this.page.getByRole('button', { name: /script_[\w-]+\s+script/i }).nth(index);
+  }
+
   // Guardrail node
   guardrailNode(index = 0): Locator {
     return this.page.getByRole('button', { name: /guardrail_[\w-]+\s+guardrail/i }).nth(index);
