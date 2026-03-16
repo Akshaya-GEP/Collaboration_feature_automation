@@ -1,0 +1,18 @@
+{
+  "selectors": {
+    "userQuerySelector": "Type your message here... (press enter to send)",
+    "agentResponseSelector": "p.mb-0"
+  },
+  "turns": [
+    {
+      "userMessage": "hi",
+      "expectedResponse": "Hi! How can I help you today?",
+      "matchType": "contains"
+    },
+    {
+      "userMessage": "who is president of india?",
+      "expectedResponse": "Droupadi Murmu",
+      "matchType": "contains"
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+{
+    "turns": [
+        {
+            "userMessage": "I want to start the evaluation",
+            "expectedIntent": "Mention that the user needs to attend the Final technical interview and provide corresponding guidance.",
+            "matchType": "semantic"
+        }
+    ]
+}

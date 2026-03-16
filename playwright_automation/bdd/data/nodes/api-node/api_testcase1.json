@@ -1,0 +1,299 @@
+{
+  "nodes": [
+    {
+      "id": "start",
+      "type": "start",
+      "name": "start",
+      "description": "Starting point of the workflow",
+      "position": {
+        "x": 77.14285714285714,
+        "y": 27.714285714285708
+      },
+      "deletable": false,
+      "selected": false,
+      "dragging": false,
+      "data": {},
+      "properties": {
+        "retryOnFailure": false,
+        "maxRetries": 6,
+        "retryInterval": 541,
+        "errorHandling": "none"
+      },
+      "config": {
+        "label": "start",
+        "nodeType": "start"
+      },
+      "variableUpdates": [
+        {
+          "fieldName": "thread.messages",
+          "operation": "append",
+          "value": "{{nodeOutput.interface.inputs.message}}",
+          "role": "user"
+        },
+        {
+          "fieldName": "system.userQuery",
+          "operation": "set",
+          "value": "{{nodeOutput.interface.inputs.message}}"
+        },
+        {
+          "fieldName": "system.attachments",
+          "operation": "set",
+          "value": "{{nodeOutput.interface.inputs.attachments}}"
+        }
+      ],
+      "width": 250,
+      "height": 96,
+      "positionAbsolute": {
+        "x": 77.14285714285714,
+        "y": 29.14285714285714
+      }
+    },
+    {
+      "id": "output",
+      "type": "output",
+      "name": "output",
+      "description": "Final output of the workflow",
+      "position": {
+        "x": 1341.4285714285716,
+        "y": 56.28571428571428
+      },
+      "deletable": true,
+      "selected": false,
+      "dragging": false,
+      "data": {},
+      "properties": {
+        "retryOnFailure": false,
+        "maxRetries": 6,
+        "retryInterval": 541,
+        "errorHandling": "none"
+      },
+      "config": {
+        "outputMapping": {
+          "messages": {
+            "type": "string",
+            "value": "{{thread.messages}}"
+          },
+          "selectedAgentId": {
+            "type": "string",
+            "value": "{{runtime.workflowMetaData.workflowId}}"
+          },
+          "selectedAgentName": {
+            "type": "string",
+            "value": "{{runtime.workflowMetaData.agentName}}"
+          }
+        }
+      },
+      "width": 150,
+      "height": 96,
+      "positionAbsolute": {
+        "x": 1341.4285714285716,
+        "y": 57.85714285714286
+      }
+    },
+    {
+      "id": "fh9e3dn",
+      "type": "api",
+      "name": "api_0",
+      "description": "",
+      "position": {
+        "x": 427.1428571428571,
+        "y": 0.7142857142857082
+      },
+      "deletable": true,
+      "properties": {
+        "retryOnFailure": false,
+        "maxRetries": 6,
+        "retryInterval": 541,
+        "errorHandling": "fail_branch"
+      },
+      "config": {
+        "method": "GET",
+        "url": "https://qistudio.gep.com/leo-dev-agent-api/agentic-orchestrations/ba095498-1661-4bf1-a181-2ba8402c2095?dc=eyJjIjoiREVWRUxPUEVSRE9NQUlOIiwiZCI6IjIwMjEwNTExIiwiZSI6IkRFViIsImEiOiJiYTFlNjFjZi1jZmEwLTQ2N2MtYTIzZi00ZGNjN2U0YzY2ZDkiLCJtIjoiYjkzNjBmM2QtM2MzMi00MDc1LTllMWUtMWFiYzBlNWVmYzIxIiwibiI6IkRFVkVMT1BFUkRPTUFJTiIsInYiOiI0NTRlZTcyMy1jZjhkLTRmY2QtYjcwNy05OGM4OWM1MDU2ZDcifQ%3D%3D",
+        "headers": "{\"Accept\":\"application/json\"}",
+        "timeout": 30000,
+        "body": ""
+      },
+      "data": {},
+      "width": 350,
+      "height": 150,
+      "selected": true,
+      "positionAbsolute": {
+        "x": 427.1428571428571,
+        "y": 0.7142857142857082
+      },
+      "dragging": false
+    },
+    {
+      "id": "abfxmxx",
+      "type": "agent",
+      "name": "agent_0",
+      "description": "",
+      "position": {
+        "x": 912.857142857143,
+        "y": 52.28571428571427
+      },
+      "deletable": true,
+      "properties": {
+        "retryOnFailure": false,
+        "maxRetries": 6,
+        "retryInterval": 541,
+        "errorHandling": "none"
+      },
+      "config": {
+        "agentStrategy": "react",
+        "model": {
+          "code": "gpt-5.2",
+          "name": "OpenAI GPT-5.2",
+          "vendor": "openai",
+          "provider": "azureopenai"
+        },
+        "promptTemplate": [
+          {
+            "id": "653c766b-e5dc-450d-bfde-e6dcaa8a931b",
+            "role": "system",
+            "text": "You are a helpful AI assistant with access to tools. Use the available tools to help answer questions and complete tasks.\n\nShow the JSON provided in {{nodes.api_0.body}}"
+          },
+          {
+            "id": "a8e126d6-05c4-4187-9247-bb1de646b1f6",
+            "role": "user",
+            "text": "User Query: {{system.userQuery}}\n\nAttachments: {{system.attachments}}"
+          }
+        ],
+        "tools": [],
+        "resources": [],
+        "libraries": [],
+        "maxIterations": 5,
+        "structuredOutput": {
+          "enable": false,
+          "name": "",
+          "description": "",
+          "schema": {
+            "type": "object",
+            "properties": {},
+            "required": [],
+            "additionalProperties": false
+          }
+        },
+        "includeThoughts": true
+      },
+      "data": {},
+      "variableUpdates": [
+        {
+          "fieldName": "thread.messages",
+          "operation": "append",
+          "value": "{{nodeOutput.text}}",
+          "role": "assistant"
+        }
+      ],
+      "width": 250,
+      "height": 104,
+      "selected": false,
+      "positionAbsolute": {
+        "x": 912.857142857143,
+        "y": 52.28571428571427
+      },
+      "dragging": false
+    }
+  ],
+  "edges": [
+    {
+      "style": {
+        "strokeWidth": 3
+      },
+      "source": "start",
+      "sourceHandle": null,
+      "target": "fh9e3dn",
+      "targetHandle": null,
+      "data": {
+        "sourceType": "start",
+        "targetType": "api"
+      },
+      "id": "reactflow__edge-start-fh9e3dn"
+    },
+    {
+      "style": {
+        "strokeWidth": 3
+      },
+      "source": "fh9e3dn",
+      "sourceHandle": "pass",
+      "target": "abfxmxx",
+      "targetHandle": null,
+      "data": {
+        "sourceType": "api",
+        "targetType": "agent"
+      },
+      "id": "reactflow__edge-fh9e3dnpass-abfxmxx"
+    },
+    {
+      "style": {
+        "strokeWidth": 3
+      },
+      "source": "abfxmxx",
+      "sourceHandle": null,
+      "target": "output",
+      "targetHandle": null,
+      "data": {
+        "sourceType": "agent",
+        "targetType": "output"
+      },
+      "id": "reactflow__edge-abfxmxx-output"
+    },
+    {
+      "style": {
+        "strokeWidth": 3
+      },
+      "source": "fh9e3dn",
+      "sourceHandle": "fail",
+      "target": "abfxmxx",
+      "targetHandle": null,
+      "data": {
+        "sourceType": "api",
+        "targetType": "agent"
+      },
+      "id": "reactflow__edge-fh9e3dnfail-abfxmxx"
+    }
+  ],
+  "variables": {
+    "flow": [],
+    "system": []
+  },
+  "interface": {
+    "inputs": {
+      "query": {
+        "type": "string",
+        "description": "User query to process",
+        "required": true
+      }
+    },
+    "outputs": {
+      "response": {
+        "type": "string",
+        "description": "Final response to the user"
+      }
+    }
+  },
+  "skills": [],
+  "publishChannels": [
+    {
+      "refId": "api",
+      "code": "api",
+      "name": "API",
+      "description": "Expose the agent as a REST API for system and app integrations"
+    },
+    {
+      "refId": "qi-ui",
+      "code": "qi-ui",
+      "name": "Qi UI",
+      "description": "Make your agent available in GEP’s Qi interface"
+    }
+  ],
+  "security": {
+    "activities": [
+      {
+        "refId": "10100002",
+        "code": "10100002",
+        "name": "Home"
+      }
+    ]
+  }
+}

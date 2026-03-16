@@ -1,0 +1,20 @@
+# Production Docker Compose for Automation
+services:
+  automation-hub:
+    build: .
+    volumes:
+      - ./test-results:/app/test-results
+      - ./.env:/app/.env
+    environment:
+      - CI=true
+    # Default to running regression
+    command: npm run bdd:regression
+
+  dashboard:
+    build: .
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./test-results:/app/test-results
+      - ./.env:/app/.env
+    command: npm run dashboard

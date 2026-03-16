@@ -1,0 +1,19 @@
+{
+  "selectors": {
+    "userQuerySelector": "Type your message here... (press enter to send)",
+    "agentResponseSelector": "p.mb-0"
+  },
+  "turns": [
+    {
+      "userMessage": "Hello",
+      "expectedResponse": "help",
+      "matchType": "contains"
+    },
+    {
+      "userMessage": "What can you do?",
+      "expectedResponse": "assistant",
+      "matchType": "contains"
+    }
+  ],
+  "minScorePerTurn": 0
+}

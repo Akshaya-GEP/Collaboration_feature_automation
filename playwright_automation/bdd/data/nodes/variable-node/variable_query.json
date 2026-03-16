@@ -1,0 +1,10 @@
+{
+    "testcase1": {
+        "userQuery": "Financial year 2020",
+        "expectedIntent": "To confirm: you asked for financial year 2020, but the instruction I have is to calculate invoice details for years greater than 2020."
+    },
+    "testcase2": {
+        "userQuery": "Financial year 2018",
+        "expectedIntent": "invoice details for financial year 2018"
+    }
+}

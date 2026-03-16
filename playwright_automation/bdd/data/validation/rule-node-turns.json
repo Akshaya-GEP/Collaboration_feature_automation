@@ -1,0 +1,21 @@
+{
+  "selectors": {
+    "userQuerySelector": "Type your message here... (press enter to send)",
+    "agentResponseSelector": "p.mb-0"
+  },
+  "turns": [
+    {
+      "userMessage": "help me to reset password",
+      "expectedResponse": "password reset",
+      "matchType": "semantic",
+      "expectedIntent": "help user with password reset process or guidance"
+    },
+    {
+      "userMessage": "who is president of india?",
+      "expectedResponse": "president of India",
+      "matchType": "semantic",
+      "expectedIntent": "answer about current president of India (e.g. Droupadi Murmu)"
+    }
+  ],
+  "minScorePerTurn": 70
+}

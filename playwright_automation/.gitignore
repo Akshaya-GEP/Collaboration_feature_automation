@@ -1,0 +1,64 @@
+# Dependencies
+node_modules/
+
+# Environment and secrets (never commit)
+.env
+.env.local
+.env.*.local
+.env.development
+.env.test
+.env.production
+
+# Auth / session (saved cookies + localStorage – reused to skip login)
+.auth/
+auth.json
+authB.json
+*.auth.json
+
+# Playwright
+test-results/
+playwright-report/
+playwright/.cache/
+blob-report/
+playback/
+*.zip
+
+# BDD / Cucumber
+test-results/
+
+# Build / compile
+dist/
+build/
+out/
+*.tsbuildinfo
+
+# Logs and temp
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.tmp
+.temp
+tmp/
+temp/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE / editors
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Coverage
+coverage/
+.nyc_output/
+*.lcov
+
+# Optional: lockfiles (uncomment if you want to ignore)
+# package-lock.json
+# yarn.lock
+# pnpm-lock.yaml

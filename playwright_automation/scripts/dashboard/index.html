@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QI Automation Hub</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=JetBrains+Mono&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="background-blobs">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
+    </div>
+
+    <main class="dashboard-container">
+        <header>
+            <div class="brand">
+                <div class="logo">QI</div>
+                <h1>Automation <span>Hub</span></h1>
+            </div>
+            <div class="status-badge" id="global-status">
+                <span class="indicator info"></span> Ready
+            </div>
+        </header>
+
+        <section class="grid">
+            <!-- Left: Controls -->
+            <div class="card glass controls">
+                <h2 class="section-title">Test Execution</h2>
+                
+                <div class="control-group">
+                    <h3>🏃 Standard Suites</h3>
+                    <div class="button-stack">
+                        <button class="btn primary" onclick="runTest('bdd:smoke')">
+                            <span class="icon">🔥</span> Run Smoke Tests
+                        </button>
+                        <button class="btn secondary" onclick="runTest('bdd:regression')">
+                            <span class="icon">📈</span> Run Regression
+                        </button>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <h3>🧩 Node Suites</h3>
+                    <div class="button-grid">
+                        <button class="btn outline" onclick="runTest('bdd:llm-node')">LLM Node</button>
+                        <button class="btn outline" onclick="runTest('test:rule')">Rule Node</button>
+                        <button class="btn outline" onclick="runTest('test:suite')">Full Node Suite</button>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <h3>⚙️ Options</h3>
+                    <label class="toggle-container">
+                        <input type="checkbox" id="headed-mode">
+                        <span class="toggle-slider"></span>
+                        Run Headed (Browser Visible)
+                    </label>
+                </div>
+
+                <div class="actions">
+                    <button class="btn danger hidden" id="stop-btn" onclick="stopTest()">
+                        <span class="icon">🛑</span> Stop Execution
+                    </button>
+                    <a href="/reports/report.html" target="_blank" class="btn success" id="report-btn">
+                        <span class="icon">📊</span> View Last Report
+                    </a>
+                </div>
+            </div>
+
+            <!-- Right: Live Console -->
+            <div class="card terminal-container">
+                <div class="terminal-header">
+                    <span>Live Console</span>
+                    <button class="clear-btn" onclick="clearConsole()">Clear</button>
+                </div>
+                <div class="terminal" id="terminal-output">
+                    <div class="log-entry system">Welcome to QI Automation Hub. Select a suite to begin.</div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+        const terminal = document.getElementById('terminal-output');
+        const stopBtn = document.getElementById('stop-btn');
+        const headedToggle = document.getElementById('headed-mode');
+        const statusIndicator = document.querySelector('#global-status .indicator');
+        const statusText = document.querySelector('#global-status').childNodes[2];
+
+        function runTest(suite) {
+            const isHeaded = headedToggle.checked;
+            const command = isHeaded ? `${suite}:headed` : suite;
+            
+            socket.emit('run-test', { command, args: [] });
+            
+            stopBtn.classList.remove('hidden');
+            statusIndicator.className = 'indicator running';
+            statusText.textContent = ' Running...';
+        }
+
+        function stopTest() {
+            socket.emit('stop-test');
+        }
+
+        function clearConsole() {
+            terminal.innerHTML = '';
+        }
+
+        socket.on('log', (data) => {
+            const div = document.createElement('div');
+            div.className = `log-entry ${data.type}`;
+            div.textContent = data.text;
+            terminal.appendChild(div);
+            terminal.scrollTop = terminal.scrollHeight;
+        });
+
+        socket.on('finished', (data) => {
+            stopBtn.classList.add('hidden');
+            statusIndicator.className = 'indicator info';
+            statusText.textContent = ' Finished';
+            
+            setTimeout(() => {
+                statusText.textContent = ' Ready';
+            }, 5000);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,14 @@
+{
+    "name": "Master Node Suite",
+    "nodes": [
+        {
+            "type": "llm",
+            "id": "node1"
+        },
+        {
+            "type": "rule",
+            "id": "node2"
+        }
+    ],
+    "comment": "Placeholder - await user provided JSON for production suite"
+}

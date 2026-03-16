@@ -1,0 +1,16 @@
+{
+    "turns": [
+        {
+            "userMessage": "hi",
+            "expectedIntent": "Greeting and ask user to choose Category or Supplier mode",
+            "expectedResponse": "hi Please choose one mode:\n\nCategory\nSupplier",
+            "matchType": "contains"
+        },
+        {
+            "userMessage": "supplier",
+            "expectedIntent": "Handoff to Supplier agent and show supplier options",
+            "expectedResponse": "What do you mean by “Supplier”?\n\nFind a supplier (for a product/material)\nSupplier onboarding / registration",
+            "matchType": "contains"
+        }
+    ]
+}

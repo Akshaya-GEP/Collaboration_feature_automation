@@ -1,0 +1,10 @@
+# Dependencies
+node_modules/
+
+# Env and secrets
+.env
+.env.local
+.env.*.local
+
+# Test / build artifacts at repo root
+test-results/

@@ -1,0 +1,368 @@
+{
+    "nodes": [
+      {
+        "id": "start",
+        "type": "start",
+        "name": "start",
+        "description": "Starting point of the orchestration",
+        "position": {
+          "x": -177.14285714285717,
+          "y": 110.78571428571428
+        },
+        "deletable": false,
+        "selected": false,
+        "dragging": false,
+        "data": {},
+        "properties": {
+          "retryOnFailure": false,
+          "maxRetries": 6,
+          "retryInterval": 541,
+          "errorHandling": "none"
+        },
+        "config": {
+          "label": "start",
+          "nodeType": "start"
+        },
+        "variableUpdates": [
+          {
+            "fieldName": "thread.messages",
+            "operation": "append",
+            "value": "{{nodeOutput.interface.inputs.message}}",
+            "role": "user"
+          },
+          {
+            "fieldName": "system.files",
+            "operation": "clear"
+          },
+          {
+            "fieldName": "system.userQuery",
+            "operation": "set",
+            "value": "{{nodeOutput.interface.inputs.message}}"
+          },
+          {
+            "fieldName": "system.attachments",
+            "operation": "set",
+            "value": "{{nodeOutput.interface.inputs.attachments}}"
+          }
+        ],
+        "width": 250,
+        "height": 96,
+        "positionAbsolute": {
+          "x": -177.14285714285717,
+          "y": 110.78571428571428
+        }
+      },
+      {
+        "id": "output",
+        "type": "output",
+        "name": "output",
+        "description": "Final output of the orchestration",
+        "position": {
+          "x": 925.7142857142858,
+          "y": 65.28571428571428
+        },
+        "deletable": true,
+        "selected": false,
+        "dragging": false,
+        "data": {},
+        "properties": {
+          "retryOnFailure": false,
+          "maxRetries": 6,
+          "retryInterval": 541,
+          "errorHandling": "none"
+        },
+        "config": {
+          "outputMapping": {
+            "messages": {
+              "type": "string",
+              "value": "{{thread.messages}}"
+            },
+            "files": {
+              "type": "array",
+              "value": "{{system.files}}"
+            },
+            "selectedAgentId": {
+              "type": "string",
+              "value": "{{runtime.workflowMetaData.workflowId}}"
+            },
+            "selectedAgentName": {
+              "type": "string",
+              "value": "{{runtime.workflowMetaData.agentName}}"
+            }
+          }
+        },
+        "width": 150,
+        "height": 96,
+        "positionAbsolute": {
+          "x": 925.7142857142858,
+          "y": 62.35714285714286
+        }
+      },
+      {
+        "id": "vr30nfu",
+        "type": "agent",
+        "name": "agent_0",
+        "description": "",
+        "position": {
+          "x": 574.2857142857142,
+          "y": 46.78571428571428
+        },
+        "deletable": true,
+        "properties": {
+          "retryOnFailure": false,
+          "maxRetries": 6,
+          "retryInterval": 541,
+          "errorHandling": "none"
+        },
+        "config": {
+          "agentStrategy": "react",
+          "model": {
+            "code": "gpt-5.2",
+            "name": "OpenAI GPT-5.2",
+            "vendor": "openai",
+            "provider": "azureopenai"
+          },
+          "promptTemplate": [
+            {
+              "id": "ebf42f7d-896f-47da-a424-3b34ff0db52c",
+              "role": "system",
+              "text": "You are a helpful AI assistant with access to tools. Use the available tools to help answer questions and complete tasks.\n"
+            },
+            {
+              "id": "f8b69c93-f550-4236-915b-1a19a4174589",
+              "role": "user",
+              "text": "User Query: {{system.userQuery}}\n\nAttachments: {{system.attachments}}"
+            }
+          ],
+          "tools": [],
+          "resources": [],
+          "libraries": [],
+          "maxIterations": 5,
+          "structuredOutput": {
+            "enable": false,
+            "name": "",
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {},
+              "required": [],
+              "additionalProperties": false
+            }
+          },
+          "includeThoughts": true
+        },
+        "data": {},
+        "variableUpdates": [
+          {
+            "fieldName": "thread.messages",
+            "operation": "append",
+            "value": "{{nodeOutput.text}}",
+            "role": "assistant"
+          }
+        ],
+        "width": 250,
+        "height": 104,
+        "selected": true,
+        "dragging": false,
+        "positionAbsolute": {
+          "x": 574.2857142857142,
+          "y": 50.92857142857143
+        }
+      },
+      {
+        "id": "w2pbwbn",
+        "type": "guardrail",
+        "name": "guardrail_0",
+        "description": "",
+        "position": {
+          "x": 181.42857142857136,
+          "y": 83.78571428571428
+        },
+        "deletable": true,
+        "properties": {
+          "retryOnFailure": false,
+          "maxRetries": 6,
+          "retryInterval": 541,
+          "errorHandling": "fail_branch"
+        },
+        "config": {
+          "input": "{{system.userQuery}}",
+          "checks": [
+            {
+              "name": "PII",
+              "stage": "input",
+              "params": {
+                "entities": [
+                  "PERSON",
+                  "EMAIL_ADDRESS",
+                  "PHONE_NUMBER",
+                  "LOCATION",
+                  "DATE_TIME",
+                  "IP_ADDRESS",
+                  "URL",
+                  "CREDIT_CARD"
+                ],
+                "confidence_threshold": 0.7
+              }
+            }
+          ]
+        },
+        "data": {},
+        "width": 307,
+        "height": 150,
+        "selected": false,
+        "dragging": false,
+        "positionAbsolute": {
+          "x": 181.42857142857136,
+          "y": 83.07142857142856
+        }
+      },
+      {
+        "id": "1twp8wl",
+        "type": "output",
+        "name": "output_0",
+        "description": "",
+        "position": {
+          "x": 591.4285714285716,
+          "y": 313.7857142857142
+        },
+        "deletable": true,
+        "properties": {
+          "retryOnFailure": false,
+          "maxRetries": 6,
+          "retryInterval": 541,
+          "errorHandling": "none"
+        },
+        "config": {
+          "outputMapping": {
+            "messages": {
+              "type": "string",
+              "value": "{{thread.messages}}"
+            },
+            "files": {
+              "type": "array",
+              "value": "{{system.files}}"
+            },
+            "selectedAgentId": {
+              "type": "string",
+              "value": "{{runtime.workflowMetaData.workflowId}}"
+            },
+            "selectedAgentName": {
+              "type": "string",
+              "value": "{{runtime.workflowMetaData.agentName}}"
+            }
+          }
+        },
+        "data": {},
+        "width": 150,
+        "height": 72,
+        "selected": false,
+        "positionAbsolute": {
+          "x": 591.4285714285716,
+          "y": 313.7857142857142
+        },
+        "dragging": false
+      }
+    ],
+    "edges": [
+      {
+        "style": {
+          "strokeWidth": 3
+        },
+        "source": "start",
+        "sourceHandle": null,
+        "target": "w2pbwbn",
+        "targetHandle": null,
+        "data": {
+          "sourceType": "start",
+          "targetType": "guardrail"
+        },
+        "id": "reactflow__edge-start-w2pbwbn"
+      },
+      {
+        "style": {
+          "strokeWidth": 3
+        },
+        "source": "w2pbwbn",
+        "sourceHandle": "pass",
+        "target": "vr30nfu",
+        "targetHandle": null,
+        "data": {
+          "sourceType": "guardrail",
+          "targetType": "agent"
+        },
+        "id": "reactflow__edge-w2pbwbnpass-vr30nfu"
+      },
+      {
+        "style": {
+          "strokeWidth": 3
+        },
+        "source": "vr30nfu",
+        "sourceHandle": null,
+        "target": "output",
+        "targetHandle": null,
+        "data": {
+          "sourceType": "agent",
+          "targetType": "output"
+        },
+        "id": "reactflow__edge-vr30nfu-output"
+      },
+      {
+        "style": {
+          "strokeWidth": 3
+        },
+        "source": "w2pbwbn",
+        "sourceHandle": "fail",
+        "target": "1twp8wl",
+        "targetHandle": null,
+        "data": {
+          "sourceType": "guardrail",
+          "targetType": "output"
+        },
+        "id": "reactflow__edge-w2pbwbnfail-1twp8wl"
+      }
+    ],
+    "variables": {
+      "flow": [],
+      "system": []
+    },
+    "interface": {
+      "inputs": {
+        "query": {
+          "type": "string",
+          "description": "User query to process",
+          "required": true
+        }
+      },
+      "outputs": {
+        "response": {
+          "type": "string",
+          "description": "Final response to the user"
+        }
+      }
+    },
+    "skills": [],
+    "publishChannels": [
+      {
+        "refId": "api",
+        "code": "api",
+        "name": "API",
+        "description": "Expose the agent as a REST API for system and app integrations"
+      },
+      {
+        "refId": "qi-ui",
+        "code": "qi-ui",
+        "name": "Qi UI",
+        "description": "Make your agent available in GEP’s Qi interface"
+      }
+    ],
+    "security": {
+      "activities": [
+        {
+          "refId": "10100002",
+          "code": "10100002",
+          "name": "Home"
+        }
+      ]
+    }
+  }

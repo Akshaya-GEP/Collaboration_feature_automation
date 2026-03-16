@@ -1,0 +1,332 @@
+{
+  "nodes": [
+    {
+      "id": "start",
+      "type": "start",
+      "name": "start",
+      "description": "Starting point of the orchestration",
+      "position": {
+        "x": 150,
+        "y": 102
+      },
+      "deletable": false,
+      "selected": false,
+      "dragging": false,
+      "data": {},
+      "properties": {
+        "retryOnFailure": false,
+        "maxRetries": 6,
+        "retryInterval": 541,
+        "errorHandling": "none"
+      },
+      "config": {
+        "label": "start",
+        "nodeType": "start"
+      },
+      "variableUpdates": [
+        {
+          "fieldName": "thread.messages",
+          "operation": "append",
+          "value": "{{nodeOutput.interface.inputs.message}}",
+          "role": "user"
+        },
+        {
+          "fieldName": "system.files",
+          "operation": "clear"
+        },
+        {
+          "fieldName": "system.userQuery",
+          "operation": "set",
+          "value": "{{nodeOutput.interface.inputs.message}}"
+        },
+        {
+          "fieldName": "system.attachments",
+          "operation": "set",
+          "value": "{{nodeOutput.interface.inputs.attachments}}"
+        }
+      ],
+      "width": 250,
+      "height": 96,
+      "positionAbsolute": {
+        "x": 150,
+        "y": 114.85714285714286
+      }
+    },
+    {
+      "id": "output",
+      "type": "output",
+      "name": "output",
+      "description": "Final output of the orchestration",
+      "position": {
+        "x": 850,
+        "y": 102
+      },
+      "deletable": true,
+      "selected": false,
+      "dragging": false,
+      "data": {},
+      "properties": {
+        "retryOnFailure": false,
+        "maxRetries": 6,
+        "retryInterval": 541,
+        "errorHandling": "none"
+      },
+      "config": {
+        "outputMapping": {
+          "messages": {
+            "type": "string",
+            "value": "{{thread.messages}}"
+          },
+          "files": {
+            "type": "array",
+            "value": "{{system.files}}"
+          },
+          "selectedAgentId": {
+            "type": "string",
+            "value": "{{runtime.workflowMetaData.workflowId}}"
+          },
+          "selectedAgentName": {
+            "type": "string",
+            "value": "{{runtime.workflowMetaData.agentName}}"
+          }
+        }
+      },
+      "width": 150,
+      "height": 96,
+      "positionAbsolute": {
+        "x": 847.1428571428571,
+        "y": 114.85714285714286
+      }
+    },
+    {
+      "id": "n1l3w0i",
+      "type": "agent",
+      "name": "agent_0",
+      "description": "",
+      "position": {
+        "x": 500,
+        "y": 83
+      },
+      "deletable": true,
+      "properties": {
+        "retryOnFailure": false,
+        "maxRetries": 6,
+        "retryInterval": 541,
+        "errorHandling": "none"
+      },
+      "config": {
+        "agentStrategy": "react",
+        "model": {
+          "code": "gpt-5.2",
+          "name": "OpenAI GPT-5.2",
+          "vendor": "openai",
+          "provider": "azureopenai"
+        },
+        "promptTemplate": [
+          {
+            "id": "ee1fdb04-2738-4202-b1a3-cb674826caf4",
+            "role": "system",
+            "text": "You are a helpful AI assistant with access to tools. Use the available tools to help answer questions and complete tasks.\n-When user asks to display chart then invoke \"ChartRender\" tool\nPAYLOAD STRUCTURE (ENFORCED)\njson{\n  \"name\": \"ChartRenderer\",\n  \"xAxisCol\": [\"<column from result data>\"],\n  \"yAxisCol\": [\"<column from result data>\"],\n  \"chartType\": \"<auto-detected>\",\n  \"isStackingEnabled\": true,\n  \"chartData\": [\n    { \"column1\": \"value1\", \"column2\": \"value2\" }\n  ]\n}\n```\nChart Data:\n{\n  \"name\": \"ChartRenderer\",\n  \"xAxisCol\": [\"Supplier Name\"],\n  \"yAxisCol\": [\"Total Spend\"],\n  \"chartType\": \"pareto\",\n  \"isStackingEnabled\": false,\n  \"chartData\": [\n    {\n      \"Supplier Name\": \"ABC Corp\",\n      \"Total Spend\": 50000\n    },\n    {\n      \"Supplier Name\": \"XYZ Ltd\",\n      \"Total Spend\": 32000\n    },\n    {\n      \"Supplier Name\": \"Delta Supplies\",\n      \"Total Spend\": 28000\n    },\n    {\n      \"Supplier Name\": \"Global Tech\",\n      \"Total Spend\": 21000\n    },\n    {\n      \"Supplier Name\": \"Prime Components\",\n      \"Total Spend\": 15000\n    }\n  ]\n}"
+          },
+          {
+            "id": "bff967cf-8798-4860-919a-f7065e9f0d9c",
+            "role": "user",
+            "text": "User Query: {{system.userQuery}}\n\nAttachments: {{system.attachments}}"
+          }
+        ],
+        "tools": [
+          {
+            "_id": "4bdfe55f-b80c-431f-9918-e64337e55cd7",
+            "name": "ChartRenderer005",
+            "description": "Description:\nThis Partial View is used for Rendering HighCharts\nPAYLOAD STRUCTURE (ENFORCED)\njson{\n  \"name\": \"ChartRenderer\",\n  \"xAxisCol\": [\"<column from result data>\"],\n  \"yAxisCol\": [\"<column from result data>\"],\n  \"chartType\": \"<auto-detected>\",\n  \"isStackingEnabled\": true,\n  \"chartData\": [\n    { \"column1\": \"value1\", \"column2\": \"value2\" }\n  ]\n}\n```\n\nNotes:\nThis Partial View is used for Rendering HighCharts",
+            "type": "tool",
+            "config": {
+              "enabled": true,
+              "toolId": "e747e805-a82b-4e9f-8c8a-cf8aa7df36ab-ChartRenderer005-14",
+              "type": "mcp",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "preText": {
+                    "description": "Optional Markdown shown immediately before this view. Use to introduce what it shows/why it matters or give brief instructions. Omit if unnecessary. Must be valid Markdown; UI preserves formatting and spacing.",
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string",
+                    "enum": [
+                      "ChartRenderer"
+                    ]
+                  },
+                  "xAxisCol": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "JSON stringified array containing column name(s) to use on x-axis"
+                  },
+                  "yAxisCol": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "JSON stringified array containing column name(s) to use on y-axis"
+                  },
+                  "chartType": {
+                    "type": "string",
+                    "description": "Type of chart (e.g., bar, line, pie, area, etc.)"
+                  },
+                  "isStackingEnabled": {
+                    "type": "boolean"
+                  },
+                  "chartData": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "additionalProperties": true
+                    },
+                    "description": "Data to be rendered in the chart"
+                  }
+                },
+                "required": [
+                  "name",
+                  "xAxisCol",
+                  "yAxisCol",
+                  "chartType",
+                  "isStackingEnabled",
+                  "chartData"
+                ],
+                "additionalProperties": true
+              },
+              "settings": {
+                "serverId": "e747e805-a82b-4e9f-8c8a-cf8aa7df36ab",
+                "serverName": "LCX Analytics Extension - InsightsAI"
+              },
+              "returnDirect": false,
+              "_meta": {
+                "uiView": "{\"RefId\":null,\"ViewUniqueId\":\"d03b0481-d32c-42cb-9873-2b17e2e9635b\",\"Version\":[0,0],\"Type\":\"partialView\",\"Name\":\"ChartRenderer-0.0.5\",\"Icon\":null,\"Channel\":\"\",\"Description\":\"This Partial View is used for Rendering HighCharts\",\"Instruction\":\"This Partial View is used for Rendering HighCharts\",\"AppId\":null,\"ModuleId\":null,\"EnableContextSharing\":true,\"Overrides\":{\"xAxisCol\":{\"Type\":\"view\",\"OverrideId\":\"xAxisCol\",\"IsMainDataSource\":null,\"ShareAsContext\":null,\"StoreId\":null,\"Description\":\"xAxisCol Data\",\"Instruction\":\"xAxisCol Data\",\"Value\":null,\"DataType\":\"array\",\"Source\":\"static\"},\"yAxisCol\":{\"Type\":\"view\",\"OverrideId\":\"yAxisCol\",\"IsMainDataSource\":null,\"ShareAsContext\":null,\"StoreId\":null,\"Description\":\"yAxisCol Data\",\"Instruction\":\"yAxisCol Data\",\"Value\":null,\"DataType\":\"array\",\"Source\":\"static\"},\"chartType\":{\"Type\":\"view\",\"OverrideId\":\"chartType\",\"IsMainDataSource\":null,\"ShareAsContext\":null,\"StoreId\":null,\"Description\":\"Type of chart\",\"Instruction\":\"Type of chart\",\"Value\":null,\"DataType\":\"string\",\"Source\":\"static\"},\"isStackingEnabled\":{\"Type\":\"view\",\"OverrideId\":\"isStackingEnabled\",\"IsMainDataSource\":null,\"ShareAsContext\":null,\"StoreId\":null,\"Description\":\"Chart is stacked or not\",\"Instruction\":\"Chart is stacked or not\",\"Value\":null,\"DataType\":\"boolean\",\"Source\":\"static\"},\"chartData\":{\"Type\":\"view\",\"OverrideId\":\"chartData\",\"IsMainDataSource\":null,\"ShareAsContext\":null,\"StoreId\":null,\"Description\":\"DATA TO BE SHOWN IN GRAPH\",\"Instruction\":\"DATA TO BE SHOWN IN GRAPH\",\"Value\":null,\"DataType\":\"array\",\"Source\":\"static\"}}}",
+                "type": "partial-view",
+                "source": "shared-module",
+                "serverName": "LCX Analytics Extension - InsightsAI"
+              },
+              "parameters": {
+                "postText": ""
+              },
+              "llmProjection": [
+                {
+                  "exclude": [
+                    "Template"
+                  ]
+                }
+              ]
+            }
+          }
+        ],
+        "resources": [],
+        "libraries": [],
+        "maxIterations": 5,
+        "structuredOutput": {
+          "enable": false,
+          "name": "",
+          "description": "",
+          "schema": {
+            "type": "object",
+            "properties": {},
+            "required": [],
+            "additionalProperties": false
+          }
+        },
+        "includeThoughts": true
+      },
+      "data": {},
+      "variableUpdates": [
+        {
+          "fieldName": "thread.messages",
+          "operation": "append",
+          "value": "{{nodeOutput.text}}",
+          "role": "assistant"
+        }
+      ],
+      "width": 250,
+      "height": 134,
+      "selected": true,
+      "positionAbsolute": {
+        "x": 512.1428571428572,
+        "y": 112.85714285714286
+      },
+      "dragging": false
+    }
+  ],
+  "edges": [
+    {
+      "style": {
+        "strokeWidth": 3
+      },
+      "source": "start",
+      "sourceHandle": null,
+      "target": "n1l3w0i",
+      "targetHandle": null,
+      "data": {
+        "sourceType": "start",
+        "targetType": "agent"
+      },
+      "id": "reactflow__edge-start-n1l3w0i"
+    },
+    {
+      "style": {
+        "strokeWidth": 3
+      },
+      "source": "n1l3w0i",
+      "sourceHandle": null,
+      "target": "output",
+      "targetHandle": null,
+      "data": {
+        "sourceType": "agent",
+        "targetType": "output"
+      },
+      "id": "reactflow__edge-n1l3w0i-output"
+    }
+  ],
+  "variables": {
+    "flow": [],
+    "system": []
+  },
+  "interface": {
+    "inputs": {
+      "query": {
+        "type": "string",
+        "description": "User query to process",
+        "required": true
+      }
+    },
+    "outputs": {
+      "response": {
+        "type": "string",
+        "description": "Final response to the user"
+      }
+    }
+  },
+  "skills": [],
+  "publishChannels": [
+    {
+      "refId": "api",
+      "code": "api",
+      "name": "API",
+      "description": "Expose the agent as a REST API for system and app integrations"
+    },
+    {
+      "refId": "qi-ui",
+      "code": "qi-ui",
+      "name": "Qi UI",
+      "description": "Make your agent available in GEP’s Qi interface"
+    }
+  ],
+  "security": {
+    "activities": [
+      {
+        "refId": "10100002",
+        "code": "10100002",
+        "name": "Home"
+      }
+    ]
+  }
+}

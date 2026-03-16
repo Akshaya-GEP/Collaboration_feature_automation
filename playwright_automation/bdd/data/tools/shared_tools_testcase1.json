@@ -1,0 +1,297 @@
+{
+    "nodes": [
+      {
+        "id": "start",
+        "type": "start",
+        "name": "start",
+        "description": "Starting point of the orchestration",
+        "position": {
+          "x": -167.14285714285717,
+          "y": 204.28571428571428
+        },
+        "deletable": false,
+        "selected": false,
+        "dragging": false,
+        "data": {},
+        "properties": {
+          "retryOnFailure": false,
+          "maxRetries": 6,
+          "retryInterval": 541,
+          "errorHandling": "none"
+        },
+        "config": {
+          "label": "start",
+          "nodeType": "start"
+        },
+        "variableUpdates": [
+          {
+            "fieldName": "thread.messages",
+            "operation": "append",
+            "value": "{{nodeOutput.interface.inputs.message}}",
+            "role": "user"
+          },
+          {
+            "fieldName": "system.files",
+            "operation": "clear"
+          },
+          {
+            "fieldName": "system.userQuery",
+            "operation": "set",
+            "value": "{{nodeOutput.interface.inputs.message}}"
+          },
+          {
+            "fieldName": "system.attachments",
+            "operation": "set",
+            "value": "{{nodeOutput.interface.inputs.attachments}}"
+          }
+        ],
+        "width": 250,
+        "height": 94,
+        "positionAbsolute": {
+          "x": -167.14285714285717,
+          "y": 204.28571428571428
+        }
+      },
+      {
+        "id": "output",
+        "type": "output",
+        "name": "output",
+        "description": "Final output of the orchestration",
+        "position": {
+          "x": 510,
+          "y": 204.28571428571428
+        },
+        "deletable": true,
+        "selected": false,
+        "dragging": false,
+        "data": {},
+        "properties": {
+          "retryOnFailure": false,
+          "maxRetries": 6,
+          "retryInterval": 541,
+          "errorHandling": "none"
+        },
+        "config": {
+          "outputMapping": {
+            "messages": {
+              "type": "string",
+              "value": "{{thread.messages}}"
+            },
+            "files": {
+              "type": "array",
+              "value": "{{system.files}}"
+            },
+            "selectedAgentId": {
+              "type": "string",
+              "value": "{{runtime.workflowMetaData.workflowId}}"
+            },
+            "selectedAgentName": {
+              "type": "string",
+              "value": "{{runtime.workflowMetaData.agentName}}"
+            }
+          }
+        },
+        "width": 150,
+        "height": 94,
+        "positionAbsolute": {
+          "x": 510,
+          "y": 204.28571428571428
+        }
+      },
+      {
+        "id": "vr30nfu",
+        "type": "agent",
+        "name": "agent_0",
+        "description": "",
+        "position": {
+          "x": 172.85714285714295,
+          "y": 200.28571428571428
+        },
+        "deletable": true,
+        "properties": {
+          "retryOnFailure": false,
+          "maxRetries": 6,
+          "retryInterval": 541,
+          "errorHandling": "none"
+        },
+        "config": {
+          "agentStrategy": "react",
+          "model": {
+            "code": "gpt-5.2",
+            "name": "OpenAI GPT-5.2",
+            "vendor": "openai",
+            "provider": "azureopenai"
+          },
+          "promptTemplate": [
+            {
+              "id": "ebf42f7d-896f-47da-a424-3b34ff0db52c",
+              "role": "system",
+              "text": "you are task is to answer user query and export the data to pptx if required or explicitly asked by the user"
+            },
+            {
+              "id": "f8b69c93-f550-4236-915b-1a19a4174589",
+              "role": "user",
+              "text": "User Query: {{system.userQuery}}\n\nAttachments: {{system.attachments}}"
+            }
+          ],
+          "tools": [
+            {
+              "_id": "1cb4cc59-52b3-42fd-a782-09f2e6bffa4c",
+              "name": "ExportToPptx",
+              "description": "Description:\nConverts a list of MARKDOWN-formatted slides into a PowerPoint (PPTX) document. Each MARKDOWN slide is processed to create corresponding\nPowerPoint slides with proper formatting for titles, subtitles, and content. The generated PPTX file is uploaded to a storage service,\nand the function returns the file name and file ID of the created document.\n\nOutputs:\n- Returns an object containing:\n  - `Name` (string): The full name of the generated PPTX file.\n  - `Id` (string): The unique identifier (file path) of the uploaded file.\n\nNotes:\n- Ideal for scenarios where MARKDOWN content needs to be programmatically converted into a PowerPoint presentation for sharing, storage, or further use.\n- **Important:** returned object must be included in the `attachments` array in the final response.",
+              "type": "tool",
+              "config": {
+                "enabled": true,
+                "toolId": "b9360f3d-3c32-4075-9e1e-1abc0e5efc21-ExportToPptx-12",
+                "type": "mcp",
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "fileName": {
+                      "description": "The base name for the export file. It should not include a file extension or the word 'export'.",
+                      "type": "string"
+                    },
+                    "slides": {
+                      "description": "A list of MARKDOWN-formatted strings, where each string represents the content of a slide.",
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "required": [
+                    "fileName",
+                    "slides"
+                  ]
+                },
+                "settings": {
+                  "serverId": "b9360f3d-3c32-4075-9e1e-1abc0e5efc21",
+                  "serverName": "module mcp"
+                },
+                "returnDirect": false,
+                "_meta": {
+                  "type": "export",
+                  "source": "current-module",
+                  "moduleId": "b9360f3d-3c32-4075-9e1e-1abc0e5efc21",
+                  "toolId": "b9360f3d-3c32-4075-9e1e-1abc0e5efc21",
+                  "serverName": "module mcp"
+                }
+              },
+              "variableUpdates": [
+                {
+                  "fieldName": "system.files",
+                  "operation": "append",
+                  "value": "{{nodeOutput}}"
+                }
+              ]
+            }
+          ],
+          "resources": [],
+          "libraries": [],
+          "maxIterations": 5,
+          "structuredOutput": {
+            "enable": false,
+            "name": "",
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {},
+              "required": [],
+              "additionalProperties": false
+            }
+          },
+          "includeThoughts": true
+        },
+        "data": {},
+        "variableUpdates": [
+          {
+            "fieldName": "thread.messages",
+            "operation": "append",
+            "value": "{{nodeOutput.text}}",
+            "role": "assistant"
+          }
+        ],
+        "width": 250,
+        "height": 132,
+        "selected": true,
+        "dragging": false,
+        "positionAbsolute": {
+          "x": 172.85714285714295,
+          "y": 201.28571428571425
+        }
+      }
+    ],
+    "edges": [
+      {
+        "id": "reactflow__edge-start-vr30nfu",
+        "source": "start",
+        "target": "vr30nfu",
+        "style": {
+          "strokeWidth": 3
+        },
+        "sourceHandle": null,
+        "targetHandle": null,
+        "data": {
+          "sourceType": "start",
+          "targetType": "agent"
+        }
+      },
+      {
+        "id": "reactflow__edge-vr30nfu-output",
+        "source": "vr30nfu",
+        "target": "output",
+        "style": {
+          "strokeWidth": 3
+        },
+        "sourceHandle": null,
+        "targetHandle": null,
+        "data": {
+          "sourceType": "agent",
+          "targetType": "output"
+        }
+      }
+    ],
+    "variables": {
+      "flow": [],
+      "system": []
+    },
+    "interface": {
+      "inputs": {
+        "query": {
+          "type": "string",
+          "description": "User query to process",
+          "required": true
+        }
+      },
+      "outputs": {
+        "response": {
+          "type": "string",
+          "description": "Final response to the user"
+        }
+      }
+    },
+    "skills": [],
+    "publishChannels": [
+      {
+        "refId": "api",
+        "code": "api",
+        "name": "API",
+        "description": "Expose the agent as a REST API for system and app integrations"
+      },
+      {
+        "refId": "qi-ui",
+        "code": "qi-ui",
+        "name": "Qi UI",
+        "description": "Make your agent available in GEP’s Qi interface"
+      }
+    ],
+    "security": {
+      "activities": [
+        {
+          "refId": "10100002",
+          "code": "10100002",
+          "name": "Home"
+        }
+      ]
+    }
+  }

@@ -1,0 +1,281 @@
+{
+    "nodes": [
+      {
+        "id": "start",
+        "type": "start",
+        "name": "start",
+        "description": "Starting point of the orchestration",
+        "position": {
+          "x": 154.28571428571428,
+          "y": 116.5
+        },
+        "deletable": false,
+        "selected": false,
+        "dragging": false,
+        "data": {},
+        "properties": {
+          "retryOnFailure": false,
+          "maxRetries": 6,
+          "retryInterval": 541,
+          "errorHandling": "none"
+        },
+        "config": {
+          "label": "start",
+          "nodeType": "start"
+        },
+        "variableUpdates": [
+          {
+            "fieldName": "thread.messages",
+            "operation": "append",
+            "value": "{{nodeOutput.interface.inputs.message}}",
+            "role": "user"
+          },
+          {
+            "fieldName": "system.files",
+            "operation": "clear"
+          },
+          {
+            "fieldName": "system.userQuery",
+            "operation": "set",
+            "value": "{{nodeOutput.interface.inputs.message}}"
+          },
+          {
+            "fieldName": "system.attachments",
+            "operation": "set",
+            "value": "{{nodeOutput.interface.inputs.attachments}}"
+          }
+        ],
+        "width": 250,
+        "height": 96,
+        "positionAbsolute": {
+          "x": 154.28571428571428,
+          "y": 116.2857142857143
+        }
+      },
+      {
+        "id": "output",
+        "type": "output",
+        "name": "output",
+        "description": "Final output of the orchestration",
+        "position": {
+          "x": 844.2857142857142,
+          "y": 116.5
+        },
+        "deletable": true,
+        "selected": false,
+        "dragging": false,
+        "data": {},
+        "properties": {
+          "retryOnFailure": false,
+          "maxRetries": 6,
+          "retryInterval": 541,
+          "errorHandling": "none"
+        },
+        "config": {
+          "outputMapping": {
+            "messages": {
+              "type": "string",
+              "value": "{{thread.messages}}"
+            },
+            "files": {
+              "type": "array",
+              "value": "{{system.files}}"
+            },
+            "selectedAgentId": {
+              "type": "string",
+              "value": "{{runtime.workflowMetaData.workflowId}}"
+            },
+            "selectedAgentName": {
+              "type": "string",
+              "value": "{{runtime.workflowMetaData.agentName}}"
+            }
+          }
+        },
+        "width": 150,
+        "height": 96,
+        "positionAbsolute": {
+          "x": 844.2857142857142,
+          "y": 113.42857142857142
+        }
+      },
+      {
+        "id": "vr30nfu",
+        "type": "agent",
+        "name": "agent_0",
+        "description": "",
+        "position": {
+          "x": 500,
+          "y": 98
+        },
+        "deletable": true,
+        "properties": {
+          "retryOnFailure": false,
+          "maxRetries": 6,
+          "retryInterval": 541,
+          "errorHandling": "none"
+        },
+        "config": {
+          "agentStrategy": "react",
+          "model": {
+            "code": "gpt-5.2",
+            "name": "OpenAI GPT-5.2",
+            "vendor": "openai",
+            "provider": "azureopenai"
+          },
+          "promptTemplate": [
+            {
+              "id": "ebf42f7d-896f-47da-a424-3b34ff0db52c",
+              "role": "system",
+              "text": "You are a helpful AI assistant with access to tools. Use the available tools to help answer questions and complete tasks.\n-you are task is o answer user query and export data to file using the tool \"GOOGLEDOCS_CREATE_DOCUMENT\""
+            },
+            {
+              "id": "f8b69c93-f550-4236-915b-1a19a4174589",
+              "role": "user",
+              "text": "User Query: {{system.userQuery}}\n\nAttachments: {{system.attachments}}"
+            }
+          ],
+          "tools": [
+            {
+              "_id": "a32db0ee-b588-42c0-9642-ee6b794ebc38",
+              "name": "GOOGLEDOCS_CREATE_DOCUMENT",
+              "description": "Creates a new Google Docs document using the provided title as filename and inserts the initial text at the beginning if non-empty, returning the document's ID and metadata (excluding body content).",
+              "type": "tool",
+              "config": {
+                "enabled": true,
+                "toolId": "e676d0a0-9161-4bc0-903f-e2a19e6ad476-GOOGLEDOCS_CREATE_DOCUMENT-1",
+                "type": "mcp",
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "text": {
+                      "type": "string",
+                      "description": "Optional initial text content to insert at the beginning of the new document. If not provided, an empty document will be created. For very large text (over 50,000 characters), the text will be inserted in chunks to avoid API limits.\nExamples:\n  \"This document outlines the key findings...\"\n  \"## Agenda\\n1. Welcome\\n2. Presentation\\n3. Q&A\"\n  \"Start of the report.\""
+                    },
+                    "title": {
+                      "type": "string",
+                      "description": "Title for the new document, used as its filename in Google Drive.\nExamples:\n  \"Quarterly Business Review\"\n  \"Project Alpha - Brainstorming Notes\"\n  \"My Vacation Itinerary\""
+                    }
+                  },
+                  "required": [
+                    "title"
+                  ],
+                  "additionalProperties": false,
+                  "$schema": "http://json-schema.org/draft-07/schema#"
+                },
+                "settings": {
+                  "serverId": "e676d0a0-9161-4bc0-903f-e2a19e6ad476",
+                  "serverName": "Google Docs"
+                },
+                "returnDirect": false,
+                "_meta": {
+                  "source": "mcp-server",
+                  "serverName": "Google Docs"
+                }
+              }
+            }
+          ],
+          "resources": [],
+          "libraries": [],
+          "maxIterations": 5,
+          "structuredOutput": {
+            "enable": false,
+            "name": "",
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {},
+              "required": [],
+              "additionalProperties": false
+            }
+          },
+          "includeThoughts": true
+        },
+        "data": {},
+        "variableUpdates": [
+          {
+            "fieldName": "thread.messages",
+            "operation": "append",
+            "value": "{{nodeOutput.text}}",
+            "role": "assistant"
+          }
+        ],
+        "width": 276,
+        "height": 133,
+        "selected": true,
+        "dragging": false
+      }
+    ],
+    "edges": [
+      {
+        "id": "reactflow__edge-start-vr30nfu",
+        "source": "start",
+        "target": "vr30nfu",
+        "style": {
+          "strokeWidth": 3
+        },
+        "sourceHandle": null,
+        "targetHandle": null,
+        "data": {
+          "sourceType": "start",
+          "targetType": "agent"
+        }
+      },
+      {
+        "id": "reactflow__edge-vr30nfu-output",
+        "source": "vr30nfu",
+        "target": "output",
+        "style": {
+          "strokeWidth": 3
+        },
+        "sourceHandle": null,
+        "targetHandle": null,
+        "data": {
+          "sourceType": "agent",
+          "targetType": "output"
+        }
+      }
+    ],
+    "variables": {
+      "flow": [],
+      "system": []
+    },
+    "interface": {
+      "inputs": {
+        "query": {
+          "type": "string",
+          "description": "User query to process",
+          "required": true
+        }
+      },
+      "outputs": {
+        "response": {
+          "type": "string",
+          "description": "Final response to the user"
+        }
+      }
+    },
+    "skills": [],
+    "publishChannels": [
+      {
+        "refId": "api",
+        "code": "api",
+        "name": "API",
+        "description": "Expose the agent as a REST API for system and app integrations"
+      },
+      {
+        "refId": "qi-ui",
+        "code": "qi-ui",
+        "name": "Qi UI",
+        "description": "Make your agent available in GEP’s Qi interface"
+      }
+    ],
+    "security": {
+      "activities": [
+        {
+          "refId": "10100002",
+          "code": "10100002",
+          "name": "Home"
+        }
+      ]
+    }
+  }

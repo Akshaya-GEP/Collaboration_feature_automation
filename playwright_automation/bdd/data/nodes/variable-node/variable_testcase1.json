@@ -1,0 +1,557 @@
+{
+    "nodes": [
+        {
+            "id": "start",
+            "type": "start",
+            "name": "start",
+            "description": "Starting point of the orchestration",
+            "position": {
+                "x": -188.9374568544362,
+                "y": 148.42857142857142
+            },
+            "deletable": false,
+            "selected": false,
+            "dragging": false,
+            "data": {},
+            "properties": {
+                "retryOnFailure": false,
+                "maxRetries": 6,
+                "retryInterval": 541,
+                "errorHandling": "none"
+            },
+            "config": {
+                "label": "start",
+                "nodeType": "start"
+            },
+            "variableUpdates": [
+                {
+                    "fieldName": "thread.messages",
+                    "operation": "append",
+                    "value": "{{nodeOutput.interface.inputs.message}}",
+                    "role": "user"
+                },
+                {
+                    "fieldName": "system.files",
+                    "operation": "clear"
+                },
+                {
+                    "fieldName": "system.userQuery",
+                    "operation": "set",
+                    "value": "{{nodeOutput.interface.inputs.message}}"
+                },
+                {
+                    "fieldName": "system.attachments",
+                    "operation": "set",
+                    "value": "{{nodeOutput.interface.inputs.attachments}}"
+                }
+            ],
+            "width": 250,
+            "height": 96,
+            "positionAbsolute": {
+                "x": -188.9374568544362,
+                "y": 150.3745685443617
+            }
+        },
+        {
+            "id": "output",
+            "type": "output",
+            "name": "output",
+            "description": "Final output of the orchestration",
+            "position": {
+                "x": 1757.8255654249883,
+                "y": 164.7313662369939
+            },
+            "deletable": true,
+            "selected": false,
+            "dragging": false,
+            "data": {},
+            "properties": {
+                "retryOnFailure": false,
+                "maxRetries": 6,
+                "retryInterval": 541,
+                "errorHandling": "none"
+            },
+            "config": {
+                "outputMapping": {
+                    "messages": {
+                        "type": "string",
+                        "value": "{{thread.messages}}"
+                    },
+                    "files": {
+                        "type": "array",
+                        "value": "{{system.files}}"
+                    },
+                    "selectedAgentId": {
+                        "type": "string",
+                        "value": "{{runtime.workflowMetaData.workflowId}}"
+                    },
+                    "selectedAgentName": {
+                        "type": "string",
+                        "value": "{{runtime.workflowMetaData.agentName}}"
+                    }
+                }
+            },
+            "width": 150,
+            "height": 96,
+            "positionAbsolute": {
+                "x": 1757.8255654249883,
+                "y": 164.7313662369939
+            }
+        },
+        {
+            "id": "0z6sb8e",
+            "type": "variable",
+            "name": "variable_0",
+            "description": "",
+            "position": {
+                "x": 591.1719048069754,
+                "y": 160.42857142857142
+            },
+            "deletable": true,
+            "properties": {
+                "retryOnFailure": false,
+                "maxRetries": 6,
+                "retryInterval": 541,
+                "errorHandling": "none"
+            },
+            "config": {},
+            "data": {},
+            "width": 250,
+            "height": 72,
+            "selected": false,
+            "positionAbsolute": {
+                "x": 591.1719048069754,
+                "y": 158.6339717169924
+            },
+            "dragging": false,
+            "variableUpdates": [
+                {
+                    "fieldName": "flow.Year",
+                    "operation": "set",
+                    "value": "{{system.userQuery}}"
+                }
+            ]
+        },
+        {
+            "id": "1ffw5t0",
+            "type": "agent",
+            "name": "agent_0",
+            "description": "",
+            "position": {
+                "x": 198.15456797116838,
+                "y": 144.42857142857142
+            },
+            "deletable": true,
+            "properties": {
+                "retryOnFailure": false,
+                "maxRetries": 6,
+                "retryInterval": 541,
+                "errorHandling": "none"
+            },
+            "config": {
+                "agentStrategy": "react",
+                "model": {
+                    "code": "gpt-5.2",
+                    "name": "OpenAI GPT-5.2",
+                    "vendor": "openai",
+                    "provider": "azureopenai"
+                },
+                "promptTemplate": [
+                    {
+                        "id": "144cc5df-6d8f-4461-8712-7bda4b1c2cec",
+                        "role": "system",
+                        "text": "You are a helpful AI assistant with access to tools. Use the available tools to help answer questions and complete tasks.\n-user will provide financial year to validate invoice."
+                    },
+                    {
+                        "id": "35f32652-ed7a-4b94-93d5-7dc4d3095852",
+                        "role": "user",
+                        "text": "User Query: {{system.userQuery}}\n\nAttachments: {{system.attachments}}"
+                    }
+                ],
+                "tools": [],
+                "resources": [],
+                "libraries": [],
+                "maxIterations": 5,
+                "structuredOutput": {
+                    "enable": false,
+                    "name": "",
+                    "description": "",
+                    "schema": {
+                        "type": "object",
+                        "properties": {},
+                        "required": [],
+                        "additionalProperties": false
+                    }
+                },
+                "includeThoughts": true
+            },
+            "data": {},
+            "variableUpdates": [
+                {
+                    "fieldName": "thread.messages",
+                    "operation": "append",
+                    "value": "{{nodeOutput.text}}",
+                    "role": "assistant"
+                }
+            ],
+            "width": 250,
+            "height": 104,
+            "selected": false,
+            "positionAbsolute": {
+                "x": 198.15456797116838,
+                "y": 144.42857142857142
+            },
+            "dragging": false
+        },
+        {
+            "id": "p2g5qg9",
+            "type": "agent",
+            "name": "agent_1",
+            "description": "",
+            "position": {
+                "x": 1260.3150449977134,
+                "y": 51.28132052415407
+            },
+            "deletable": true,
+            "properties": {
+                "retryOnFailure": false,
+                "maxRetries": 6,
+                "retryInterval": 541,
+                "errorHandling": "none"
+            },
+            "config": {
+                "agentStrategy": "react",
+                "model": {
+                    "code": "gpt-5.2",
+                    "name": "OpenAI GPT-5.2",
+                    "vendor": "openai",
+                    "provider": "azureopenai"
+                },
+                "promptTemplate": [
+                    {
+                        "id": "68f17118-22fb-4368-8b6b-8dad7a6c1e9e",
+                        "role": "system",
+                        "text": "You are a helpful AI assistant with access to tools. Use the available tools to help answer questions and complete tasks.\n-Calculate invoice details for year greater than 2020"
+                    },
+                    {
+                        "id": "ba34dd57-ccc7-426d-9ae4-67eefc5dbab1",
+                        "role": "user",
+                        "text": "User Query: {{system.userQuery}}\n\nAttachments: {{system.attachments}}"
+                    }
+                ],
+                "tools": [],
+                "resources": [],
+                "libraries": [],
+                "maxIterations": 5,
+                "structuredOutput": {
+                    "enable": false,
+                    "name": "",
+                    "description": "",
+                    "schema": {
+                        "type": "object",
+                        "properties": {},
+                        "required": [],
+                        "additionalProperties": false
+                    }
+                },
+                "includeThoughts": true
+            },
+            "data": {},
+            "variableUpdates": [
+                {
+                    "fieldName": "thread.messages",
+                    "operation": "append",
+                    "value": "{{nodeOutput.text}}",
+                    "role": "assistant"
+                }
+            ],
+            "width": 250,
+            "height": 104,
+            "selected": false,
+            "positionAbsolute": {
+                "x": 1260.3150449977134,
+                "y": 51.28132052415407
+            },
+            "dragging": false
+        },
+        {
+            "id": "ydkc6jw",
+            "type": "rule",
+            "name": "rule_0",
+            "description": "",
+            "position": {
+                "x": 942.6708960482256,
+                "y": 133.92857142857142
+            },
+            "deletable": true,
+            "properties": {
+                "retryOnFailure": false,
+                "maxRetries": 6,
+                "retryInterval": 541,
+                "errorHandling": "none"
+            },
+            "config": {
+                "rules": [
+                    {
+                        "ruleId": "r-ybexp29v",
+                        "enable": true,
+                        "conditions": [
+                            {
+                                "field": "{{flow.Year}}",
+                                "operator": ">=",
+                                "value": 2020
+                            }
+                        ],
+                        "logicType": "AND"
+                    },
+                    {
+                        "ruleId": "r-else",
+                        "enable": true,
+                        "conditions": [],
+                        "logicType": "default"
+                    }
+                ]
+            },
+            "data": {},
+            "width": 272,
+            "height": 170,
+            "selected": false,
+            "positionAbsolute": {
+                "x": 942.6708960482256,
+                "y": 133.83290725678935
+            },
+            "dragging": false
+        },
+        {
+            "id": "9dgn7xv",
+            "type": "agent",
+            "name": "agent_2",
+            "description": "",
+            "position": {
+                "x": 1269.4554303382226,
+                "y": 347.55765971730784
+            },
+            "deletable": true,
+            "properties": {
+                "retryOnFailure": false,
+                "maxRetries": 6,
+                "retryInterval": 541,
+                "errorHandling": "none"
+            },
+            "config": {
+                "agentStrategy": "react",
+                "model": {
+                    "code": "gpt-5.2",
+                    "name": "OpenAI GPT-5.2",
+                    "vendor": "openai",
+                    "provider": "azureopenai"
+                },
+                "promptTemplate": [
+                    {
+                        "id": "21c55ca5-e07c-4fd8-a9c6-5247884e5229",
+                        "role": "system",
+                        "text": "You are a helpful AI assistant with access to tools. Use the available tools to help answer questions and complete tasks.\nCalculate invoice details for year lesser than 2020"
+                    },
+                    {
+                        "id": "4e3380c5-b429-4e73-94f9-35cb335c1764",
+                        "role": "user",
+                        "text": "User Query: {{system.userQuery}}\n\nAttachments: {{system.attachments}}"
+                    }
+                ],
+                "tools": [],
+                "resources": [],
+                "libraries": [],
+                "maxIterations": 5,
+                "structuredOutput": {
+                    "enable": false,
+                    "name": "",
+                    "description": "",
+                    "schema": {
+                        "type": "object",
+                        "properties": {},
+                        "required": [],
+                        "additionalProperties": false
+                    }
+                },
+                "includeThoughts": true
+            },
+            "data": {},
+            "variableUpdates": [
+                {
+                    "fieldName": "thread.messages",
+                    "operation": "append",
+                    "value": "{{nodeOutput.text}}",
+                    "role": "assistant"
+                }
+            ],
+            "width": 250,
+            "height": 104,
+            "selected": true,
+            "positionAbsolute": {
+                "x": 1269.4554303382226,
+                "y": 347.55765971730784
+            },
+            "dragging": false
+        }
+    ],
+    "edges": [
+        {
+            "style": {
+                "strokeWidth": 3
+            },
+            "source": "start",
+            "sourceHandle": null,
+            "target": "1ffw5t0",
+            "targetHandle": null,
+            "data": {
+                "sourceType": "start",
+                "targetType": "agent"
+            },
+            "id": "reactflow__edge-start-1ffw5t0"
+        },
+        {
+            "style": {
+                "strokeWidth": 3
+            },
+            "source": "1ffw5t0",
+            "sourceHandle": null,
+            "target": "0z6sb8e",
+            "targetHandle": null,
+            "data": {
+                "sourceType": "agent",
+                "targetType": "variable"
+            },
+            "id": "reactflow__edge-1ffw5t0-0z6sb8e"
+        },
+        {
+            "style": {
+                "strokeWidth": 3
+            },
+            "source": "0z6sb8e",
+            "sourceHandle": null,
+            "target": "ydkc6jw",
+            "targetHandle": null,
+            "data": {
+                "sourceType": "variable",
+                "targetType": "rule"
+            },
+            "id": "reactflow__edge-0z6sb8e-ydkc6jw"
+        },
+        {
+            "style": {
+                "strokeWidth": 3
+            },
+            "source": "ydkc6jw",
+            "sourceHandle": "r-ybexp29v",
+            "target": "p2g5qg9",
+            "targetHandle": null,
+            "data": {
+                "sourceType": "rule",
+                "targetType": "agent"
+            },
+            "id": "reactflow__edge-ydkc6jwr-ybexp29v-p2g5qg9"
+        },
+        {
+            "style": {
+                "strokeWidth": 3
+            },
+            "source": "ydkc6jw",
+            "sourceHandle": "r-else",
+            "target": "9dgn7xv",
+            "targetHandle": null,
+            "data": {
+                "sourceType": "rule",
+                "targetType": "agent"
+            },
+            "id": "reactflow__edge-ydkc6jwr-else-9dgn7xv"
+        },
+        {
+            "style": {
+                "strokeWidth": 3
+            },
+            "source": "p2g5qg9",
+            "sourceHandle": null,
+            "target": "output",
+            "targetHandle": null,
+            "data": {
+                "sourceType": "agent",
+                "targetType": "output"
+            },
+            "id": "reactflow__edge-p2g5qg9-output"
+        },
+        {
+            "style": {
+                "strokeWidth": 3
+            },
+            "source": "9dgn7xv",
+            "sourceHandle": null,
+            "target": "output",
+            "targetHandle": null,
+            "data": {
+                "sourceType": "agent",
+                "targetType": "output"
+            },
+            "id": "reactflow__edge-9dgn7xv-output"
+        }
+    ],
+    "variables": {
+        "flow": [
+            {
+                "id": "var-0tld9ezrz",
+                "name": "category",
+                "type": "string",
+                "description": "category",
+                "default": "",
+                "required": false
+            },
+            {
+                "id": "var-pyoaaff7j",
+                "name": "Year",
+                "type": "string",
+                "description": "Year",
+                "default": "",
+                "required": false
+            }
+        ],
+        "system": []
+    },
+    "interface": {
+        "inputs": {
+            "query": {
+                "type": "string",
+                "description": "User query to process",
+                "required": true
+            }
+        },
+        "outputs": {
+            "response": {
+                "type": "string",
+                "description": "Final response to the user"
+            }
+        }
+    },
+    "skills": [],
+    "publishChannels": [
+        {
+            "refId": "api",
+            "code": "api",
+            "name": "API",
+            "description": "Expose the agent as a REST API for system and app integrations"
+        },
+        {
+            "refId": "qi-ui",
+            "code": "qi-ui",
+            "name": "Qi UI",
+            "description": "Make your agent available in GEP’s Qi interface"
+        }
+    ],
+    "security": {
+        "activities": [
+            {
+                "refId": "10100002",
+                "code": "10100002",
+                "name": "Home"
+            }
+        ]
+    }
+}

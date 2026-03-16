@@ -1,0 +1,16 @@
+{
+    "turns": [
+        {
+            "userMessage": "hi",
+            "expectedIntent": "Greeting and ask user to choose Category or Supplier mode",
+            "expectedResponse": "hi Please choose one mode:\n\nCategory\nSupplier",
+            "matchType": "contains"
+        },
+        {
+            "userMessage": "category",
+            "expectedIntent": "Handoff to Category agent and show category options",
+            "expectedResponse": "Which “Category” do you mean?\n\nHelp choosing a category for an item/listing\nClassifying text/content into a category",
+            "matchType": "contains"
+        }
+    ]
+}

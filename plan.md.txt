@@ -1,0 +1,187 @@
+Agentic nodes testing (Playwright + Cucumber)
+
+Goal
+
+Add test coverage for all specified nodes and flows by writing feature files and step definitions in the existing Playwright + Cucumber framework. Node behavior is validated only through UI/API flows (create workflow, configure nodes, run, assert). No unit tests or mocks inside services/libs/agentic-engine.
+
+
+
+Scope: what to test
+
+Node-level (one or more scenarios each)
+
+
+
+
+
+LLM node  
+
+
+
+Rule node  
+
+
+
+Agent node with system tools  
+
+
+
+Agent node with shared tools  
+
+
+
+Agent node with MCP tools  
+
+
+
+Variable node  
+
+
+
+Script node  
+
+
+
+Guardrail node
+
+Integration (one or more scenarios each)
+
+
+
+
+
+Handoff: (a) multiple handoffs in sequence, (b) route to the same handoff target multiple times  
+
+
+
+Variable node + Agent node  
+
+
+
+Script node + Agent node  
+
+
+
+Guardrail node + Agent node
+
+
+
+Where everything lives
+
+
+
+
+
+
+
+Item
+
+
+
+Location
+
+
+
+
+
+Feature files (Gherkin)
+
+
+
+playwright_automation/bdd/features/
+
+
+
+
+
+Step definitions
+
+
+
+playwright_automation/bdd/step-definitions/
+
+
+
+
+
+Test data (workflow JSON, configs)
+
+
+
+playwright_automation/bdd/data/
+
+
+
+
+
+Scenario inventory / checklist
+
+
+
+playwright_automation/bdd/features/NODES_TEST_PLAN.md (new) or section in docs/TEST-PLAN-AGENTIC-NODES.md
+
+Existing references: workflow.feature, LLMValidation.feature, README_FRAMEWORK.md.
+
+
+
+Process (order of work)
+
+Step 1 – Scenario inventory
+Write one document that lists every scenario to implement (e.g. in playwright_automation/bdd/features/NODES_TEST_PLAN.md). For each node and integration flow, write one line per scenario, e.g. “Create workflow with LLM node, run, validate response in chat.” No code yet.
+
+Step 2 – Feature files
+Create or update .feature files under playwright_automation/bdd/features/ so each scenario from the inventory becomes a Gherkin Scenario or Scenario Outline. Use high-level steps: open app, login, add node(s), configure, link, save, run, assert result. Reuse existing steps (e.g. from workflow.steps.ts, AgentCreation.steps.ts, LLMValidation.steps.ts) where possible. Add tags (e.g. @nodes_llm, @handoff) for filtering.
+
+Step 3 – Test data
+Add JSON (or other) fixtures in playwright_automation/bdd/data/ for workflows that need fixed structure (e.g. Rule with two branches, Variable + Agent, Handoff chain). Reference these in feature steps (e.g. “paste workflow from …”) so scenarios are repeatable.
+
+Step 4 – Step definitions
+Implement only the steps that don’t exist yet: new step definitions in bdd/step-definitions/ and, if needed, new or updated page objects under pages/. Keep steps at UI/flow level (e.g. “add Rule node,” “assert run completed”), not node-internals.
+
+Step 5 – Run and tag
+Run BDD via existing commands (e.g. npm run bdd:unified). Use tags to run by area (e.g. only @nodes_rule or @handoff_integration).
+
+
+
+Out of scope
+
+
+
+
+
+No Jest specs in services/libs/agentic-engine for node logic.  
+
+
+
+No mocking of LLM/ToolManager/StateManager inside the repo.  
+
+
+
+Node-level coverage is only through Playwright + Cucumber.
+
+
+
+Checklist summary
+
+
+
+
+
+[ ] Write scenario inventory (one doc).
+
+
+
+[ ] Add/update feature files for each node and integration flow.
+
+
+
+[ ] Add test data fixtures where needed.
+
+
+
+[ ] Implement missing step definitions (and pages if needed).
+
+
+
+[ ] Run tests and use tags for targeted runs.
+

@@ -1,0 +1,491 @@
+{
+    "nodes": [
+        {
+            "id": "start",
+            "type": "start",
+            "name": "start",
+            "description": "Starting point of the orchestration",
+            "position": {
+                "x": 105.71428571428567,
+                "y": 137
+            },
+            "deletable": false,
+            "selected": false,
+            "dragging": false,
+            "data": {},
+            "properties": {
+                "retryOnFailure": false,
+                "maxRetries": 6,
+                "retryInterval": 541,
+                "errorHandling": "none"
+            },
+            "config": {
+                "label": "start",
+                "nodeType": "start"
+            },
+            "variableUpdates": [
+                {
+                    "fieldName": "thread.messages",
+                    "operation": "append",
+                    "value": "{{nodeOutput.interface.inputs.message}}",
+                    "role": "user"
+                },
+                {
+                    "fieldName": "system.files",
+                    "operation": "clear"
+                },
+                {
+                    "fieldName": "system.userQuery",
+                    "operation": "set",
+                    "value": "{{nodeOutput.interface.inputs.message}}"
+                },
+                {
+                    "fieldName": "system.attachments",
+                    "operation": "set",
+                    "value": "{{nodeOutput.interface.inputs.attachments}}"
+                }
+            ],
+            "width": 250,
+            "height": 96,
+            "positionAbsolute": {
+                "x": 105.71428571428567,
+                "y": 137.42857142857144
+            }
+        },
+        {
+            "id": "output",
+            "type": "output",
+            "name": "output",
+            "description": "Final output of the orchestration",
+            "position": {
+                "x": 908.5714285714287,
+                "y": 137
+            },
+            "deletable": true,
+            "selected": false,
+            "dragging": false,
+            "data": {},
+            "properties": {
+                "retryOnFailure": false,
+                "maxRetries": 6,
+                "retryInterval": 541,
+                "errorHandling": "none"
+            },
+            "config": {
+                "outputMapping": {
+                    "messages": {
+                        "type": "string",
+                        "value": "{{thread.messages}}"
+                    },
+                    "files": {
+                        "type": "array",
+                        "value": "{{system.files}}"
+                    },
+                    "selectedAgentId": {
+                        "type": "string",
+                        "value": "{{runtime.workflowMetaData.workflowId}}"
+                    },
+                    "selectedAgentName": {
+                        "type": "string",
+                        "value": "{{runtime.workflowMetaData.agentName}}"
+                    }
+                }
+            },
+            "width": 150,
+            "height": 96,
+            "positionAbsolute": {
+                "x": 908.5714285714287,
+                "y": 136.2857142857143
+            }
+        },
+        {
+            "id": "rxai8to",
+            "type": "agent",
+            "name": "agent_0",
+            "description": "",
+            "position": {
+                "x": 460.71428571428567,
+                "y": 106
+            },
+            "deletable": true,
+            "properties": {
+                "retryOnFailure": false,
+                "maxRetries": 6,
+                "retryInterval": 541,
+                "errorHandling": "none"
+            },
+            "config": {
+                "agentStrategy": "react",
+                "model": {
+                    "code": "gpt-5.2",
+                    "name": "OpenAI GPT-5.2",
+                    "vendor": "openai",
+                    "provider": "azureopenai"
+                },
+                "promptTemplate": [
+                    {
+                        "id": "c2d4b0e0-c12e-4f02-a93a-216a3c54196f",
+                        "role": "system",
+                        "text": "You are a helpful AI assistant with access to tools. Use the available tools to help answer questions and complete tasks.\nAsk user to select one of the mode :\n-Category \n-Supplier \nIf user selects \"Category \" then invoke \"handoff_to_agent1\"\nIf user selects \"Supplier\" then invoke \"handoff_to_agent2\""
+                    },
+                    {
+                        "id": "ab18caac-051f-42dd-8ffc-4caac85e6320",
+                        "role": "user",
+                        "text": "User Query: {{system.userQuery}}\n\nAttachments: {{system.attachments}}"
+                    }
+                ],
+                "tools": [
+                    {
+                        "_id": "85c538e5-0a90-406f-80a6-a71bdf6c3675",
+                        "name": "handoff_to_node",
+                        "description": "Hands off execution to the node",
+                        "type": "tool",
+                        "config": {
+                            "enabled": true,
+                            "toolId": "tool-handoff",
+                            "type": "handoff",
+                            "schema": {
+                                "type": "object",
+                                "properties": {},
+                                "required": [],
+                                "additionalProperties": false
+                            },
+                            "settings": {
+                                "nodeId": "0h9yae4"
+                            },
+                            "returnDirect": false
+                        },
+                        "alias": "handoff_to_agent2"
+                    },
+                    {
+                        "_id": "7782ce19-4314-44ae-af18-abe7c072c832",
+                        "name": "handoff_to_node",
+                        "description": "Hands off execution to the node",
+                        "type": "tool",
+                        "config": {
+                            "enabled": true,
+                            "toolId": "tool-handoff",
+                            "type": "handoff",
+                            "schema": {
+                                "type": "object",
+                                "properties": {},
+                                "required": [],
+                                "additionalProperties": false
+                            },
+                            "settings": {
+                                "nodeId": "obny95e"
+                            },
+                            "returnDirect": false
+                        },
+                        "alias": "handoff_to_agent1"
+                    }
+                ],
+                "resources": [],
+                "libraries": [],
+                "maxIterations": 5,
+                "structuredOutput": {
+                    "enable": false,
+                    "name": "",
+                    "description": "",
+                    "schema": {
+                        "type": "object",
+                        "properties": {},
+                        "required": [],
+                        "additionalProperties": false
+                    }
+                },
+                "includeThoughts": true
+            },
+            "data": {},
+            "variableUpdates": [
+                {
+                    "fieldName": "thread.messages",
+                    "operation": "append",
+                    "value": "{{nodeOutput.text}}",
+                    "role": "assistant"
+                }
+            ],
+            "width": 323,
+            "height": 158,
+            "selected": false,
+            "positionAbsolute": {
+                "x": 460.71428571428567,
+                "y": 104.57142857142858
+            },
+            "dragging": false
+        },
+        {
+            "id": "obny95e",
+            "type": "agent",
+            "name": "agent_1",
+            "description": "",
+            "position": {
+                "x": 533.7142857142857,
+                "y": 405.99999999999994
+            },
+            "deletable": true,
+            "properties": {
+                "retryOnFailure": false,
+                "maxRetries": 6,
+                "retryInterval": 541,
+                "errorHandling": "none"
+            },
+            "config": {
+                "agentStrategy": "react",
+                "model": {
+                    "code": "gpt-5.2",
+                    "name": "OpenAI GPT-5.2",
+                    "vendor": "openai",
+                    "provider": "azureopenai"
+                },
+                "promptTemplate": [
+                    {
+                        "id": "1010db29-f354-4716-b69c-69801450b2ed",
+                        "role": "system",
+                        "text": "You are a Category specialization agent "
+                    },
+                    {
+                        "id": "45763882-0cb7-4d96-b544-56d34888ac2e",
+                        "role": "user",
+                        "text": "User Query: {{system.userQuery}}\n\nAttachments: {{system.attachments}}"
+                    }
+                ],
+                "tools": [],
+                "resources": [],
+                "libraries": [],
+                "maxIterations": 5,
+                "structuredOutput": {
+                    "enable": false,
+                    "name": "",
+                    "description": "",
+                    "schema": {
+                        "type": "object",
+                        "properties": {},
+                        "required": [],
+                        "additionalProperties": false
+                    }
+                },
+                "includeThoughts": true
+            },
+            "data": {},
+            "variableUpdates": [
+                {
+                    "fieldName": "thread.agent_0_messages",
+                    "operation": "append",
+                    "value": "{{nodeOutput.text}}",
+                    "role": "tool"
+                }
+            ],
+            "width": 250,
+            "height": 104,
+            "selected": false,
+            "positionAbsolute": {
+                "x": 534.9999999999999,
+                "y": 405.99999999999994
+            },
+            "dragging": false
+        },
+        {
+            "id": "0h9yae4",
+            "type": "agent",
+            "name": "agent_2",
+            "description": "",
+            "position": {
+                "x": 533.7142857142857,
+                "y": 518.8571428571429
+            },
+            "deletable": true,
+            "properties": {
+                "retryOnFailure": false,
+                "maxRetries": 6,
+                "retryInterval": 541,
+                "errorHandling": "none"
+            },
+            "config": {
+                "agentStrategy": "react",
+                "model": {
+                    "code": "gpt-5.2",
+                    "name": "OpenAI GPT-5.2",
+                    "vendor": "openai",
+                    "provider": "azureopenai"
+                },
+                "promptTemplate": [
+                    {
+                        "id": "26b2d4ee-a081-4551-975b-2bba55d48ea6",
+                        "role": "system",
+                        "text": "You are a Supplier assistant."
+                    },
+                    {
+                        "id": "3b4d73c8-83c0-4e00-b503-aec7b60696f4",
+                        "role": "user",
+                        "text": "User Query: {{system.userQuery}}\n\nAttachments: {{system.attachments}}"
+                    }
+                ],
+                "tools": [],
+                "resources": [],
+                "libraries": [],
+                "maxIterations": 5,
+                "structuredOutput": {
+                    "enable": false,
+                    "name": "",
+                    "description": "",
+                    "schema": {
+                        "type": "object",
+                        "properties": {},
+                        "required": [],
+                        "additionalProperties": false
+                    }
+                },
+                "includeThoughts": true
+            },
+            "data": {},
+            "variableUpdates": [
+                {
+                    "fieldName": "thread.agent_0_messages",
+                    "operation": "append",
+                    "value": "{{nodeOutput.text}}",
+                    "role": "tool"
+                }
+            ],
+            "width": 250,
+            "height": 104,
+            "selected": true,
+            "positionAbsolute": {
+                "x": 532.1428571428571,
+                "y": 518.8571428571429
+            },
+            "dragging": false
+        }
+    ],
+    "edges": [
+        {
+            "style": {
+                "strokeWidth": 3
+            },
+            "source": "start",
+            "sourceHandle": null,
+            "target": "rxai8to",
+            "targetHandle": null,
+            "data": {
+                "sourceType": "start",
+                "targetType": "agent"
+            },
+            "id": "reactflow__edge-start-rxai8to"
+        },
+        {
+            "style": {
+                "strokeWidth": 3
+            },
+            "source": "rxai8to",
+            "sourceHandle": null,
+            "target": "output",
+            "targetHandle": null,
+            "data": {
+                "sourceType": "agent",
+                "targetType": "output"
+            },
+            "id": "reactflow__edge-rxai8to-output"
+        },
+        {
+            "id": "rxai8to-handoff-7782ce19-4314-44ae-af18-abe7c072c832",
+            "type": "handoff",
+            "source": "rxai8to",
+            "target": "obny95e",
+            "sourceHandle": "handoff",
+            "targetHandle": null,
+            "deletable": false,
+            "data": {
+                "toolId": "7782ce19-4314-44ae-af18-abe7c072c832",
+                "isHandoff": true,
+                "sourceType": "agent",
+                "targetType": "agent"
+            }
+        },
+        {
+            "id": "rxai8to-handoff-85c538e5-0a90-406f-80a6-a71bdf6c3675",
+            "type": "handoff",
+            "source": "rxai8to",
+            "target": "0h9yae4",
+            "sourceHandle": "handoff",
+            "targetHandle": null,
+            "deletable": false,
+            "data": {
+                "toolId": "85c538e5-0a90-406f-80a6-a71bdf6c3675",
+                "isHandoff": true,
+                "sourceType": "agent",
+                "targetType": "agent"
+            }
+        },
+        {
+            "style": {
+                "strokeWidth": 3
+            },
+            "source": "obny95e",
+            "sourceHandle": null,
+            "target": "rxai8to",
+            "targetHandle": null,
+            "data": {
+                "sourceType": "agent",
+                "targetType": "agent"
+            },
+            "id": "reactflow__edge-obny95e-rxai8to"
+        },
+        {
+            "style": {
+                "strokeWidth": 3
+            },
+            "source": "0h9yae4",
+            "sourceHandle": null,
+            "target": "rxai8to",
+            "targetHandle": null,
+            "data": {
+                "sourceType": "agent",
+                "targetType": "agent"
+            },
+            "id": "reactflow__edge-0h9yae4-rxai8to"
+        }
+    ],
+    "variables": {
+        "flow": [],
+        "system": []
+    },
+    "interface": {
+        "inputs": {
+            "query": {
+                "type": "string",
+                "description": "User query to process",
+                "required": true
+            }
+        },
+        "outputs": {
+            "response": {
+                "type": "string",
+                "description": "Final response to the user"
+            }
+        }
+    },
+    "skills": [],
+    "publishChannels": [
+        {
+            "refId": "api",
+            "code": "api",
+            "name": "API",
+            "description": "Expose the agent as a REST API for system and app integrations"
+        },
+        {
+            "refId": "qi-ui",
+            "code": "qi-ui",
+            "name": "Qi UI",
+            "description": "Make your agent available in GEP’s Qi interface"
+        }
+    ],
+    "security": {
+        "activities": [
+            {
+                "refId": "10100002",
+                "code": "10100002",
+                "name": "Home"
+            }
+        ]
+    }
+}
