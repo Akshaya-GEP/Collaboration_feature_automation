@@ -145,11 +145,102 @@ export class AgentNodePanel {
     console.log('Skipping system prompt configuration - using defaults');
   }
 
+  private get titleInput() {
+    return this.page.getByPlaceholder('Add name...')
+      .or(this.page.locator('input[placeholder*="name" i]').first())
+      .first();
+  }
+
+  /**
+   * Set the agent node title (name field at the top of the panel).
+   */
+  async setAgentTitle(title: string): Promise<void> {
+    await expect(this.titleInput).toBeVisible({ timeout: 10_000 });
+    await this.titleInput.click();
+    await this.titleInput.clear();
+    await this.titleInput.fill(title);
+    await this.page.waitForTimeout(500);
+    console.log(`✅ Agent title set to: ${title}`);
+  }
+
+  /**
+   * Assert the agent node title matches the expected value (for collab sync in Browser B).
+   * The app lowercases the title, so comparison is case-insensitive.
+   */
+  async expectAgentTitle(expectedTitle: string): Promise<void> {
+    await expect(this.titleInput).toHaveValue(expectedTitle.toLowerCase(), { timeout: 15_000 });
+    console.log(`✅ Agent title verified: ${expectedTitle}`);
+  }
+
+  private get descriptionInput() {
+    return this.page.getByPlaceholder('Add description...')
+      .or(this.page.locator('textarea[placeholder*="description" i]').first())
+      .or(this.page.locator('input[placeholder*="description" i]').first())
+      .first();
+  }
+
+  /**
+   * Set the agent node description (field below the title at the top of the panel).
+   */
+  async setAgentDescription(description: string): Promise<void> {
+    await expect(this.descriptionInput).toBeVisible({ timeout: 10_000 });
+    await this.descriptionInput.click();
+    await this.descriptionInput.clear();
+    await this.descriptionInput.fill(description);
+    await this.page.waitForTimeout(500);
+    console.log(`✅ Agent description set to: ${description}`);
+  }
+
+  /**
+   * Assert the agent node description matches the expected value (for collab sync in Browser B).
+   */
+  async expectAgentDescription(expectedDescription: string): Promise<void> {
+    await expect(this.descriptionInput).toHaveValue(expectedDescription, { timeout: 15_000 });
+    console.log(`✅ Agent description verified: ${expectedDescription}`);
+  }
+
+  /**
+   * Change the model in the agent panel when a model is already selected.
+   * Clicks the dropdown trigger showing the current model, then picks the target from the list.
+   */
+  async changeModel(model: string): Promise<void> {
+    // Scroll up to make sure the Model area is in view
+    await this.page.getByText('Model', { exact: false }).first().scrollIntoViewIfNeeded();
+    await this.page.waitForTimeout(300);
+
+    // The trigger is a button/combobox that shows the current model name (e.g. "OpenAI GPT-5.2 400K")
+    const modelTrigger = this.page.locator('button, [role="combobox"]')
+      .filter({ hasText: /gpt|openai/i })
+      .first();
+    await expect(modelTrigger).toBeVisible({ timeout: 10_000 });
+    console.log('Clicking model dropdown trigger...');
+    await modelTrigger.click();
+    await this.page.waitForTimeout(1000);
+
+    // The dropdown renders as a popover with role="option" items; pick the first exact match
+    const pattern = this.modelToOptionPattern(model);
+    const modelOption = this.page.locator('[role="option"]').filter({ hasText: pattern }).first();
+
+    await expect(modelOption).toBeVisible({ timeout: 10_000 });
+    await modelOption.click();
+    await this.page.waitForTimeout(1000);
+    console.log(`✅ Model changed to: ${model}`);
+  }
+
+  /**
+   * Assert the currently selected model text is visible on the page (for collab sync in Browser B).
+   */
+  async expectModel(expectedModel: string): Promise<void> {
+    const pattern = this.modelToOptionPattern(expectedModel);
+    await expect(this.page.getByText(pattern).first()).toBeVisible({ timeout: 15_000 });
+    console.log(`✅ Model verified: ${expectedModel}`);
+  }
+
   /**
    * Set the prompt template / instructions in the agent panel (e.g. "you are an ai assistant").
+   * Targets the first editable field in the Instructions region (system prompt).
    */
   async setPromptTemplate(text: string): Promise<void> {
-    // Single scoped locator to avoid strict-mode violation (Instructions region has one editable field)
     const instructionsBox = this.page
       .getByRole('region', { name: 'Instructions' })
       .locator('[contenteditable="true"], textarea')
@@ -161,6 +252,24 @@ export class AgentNodePanel {
     await this.page.waitForTimeout(200);
     await this.page.keyboard.type(text);
     await this.page.waitForTimeout(500);
+  }
+
+  /**
+   * Set the user prompt (second editable field in the Instructions region, role: "user").
+   */
+  async setUserPrompt(text: string): Promise<void> {
+    const userPromptBox = this.page
+      .getByRole('region', { name: 'Instructions' })
+      .locator('[contenteditable="true"], textarea')
+      .nth(1);
+    await expect(userPromptBox).toBeVisible({ timeout: 10_000 });
+    await userPromptBox.click();
+    await this.page.waitForTimeout(300);
+    await this.page.keyboard.press('ControlOrMeta+a');
+    await this.page.waitForTimeout(200);
+    await this.page.keyboard.type(text);
+    await this.page.waitForTimeout(500);
+    console.log(`✅ User prompt set to: ${text}`);
   }
 
   async closePanel() {
@@ -323,5 +432,232 @@ export class AgentNodePanel {
     await expect(this.page.getByText(action, { exact: true })).toBeVisible({ timeout: 5_000 });
     await expect(this.page.getByText(value)).toBeVisible({ timeout: 5_000 });
     console.log('✅ State update visible in panel');
+  }
+
+  /**
+   * Ensure the State Update section is open (expand only if collapsed).
+   */
+  async ensureStateUpdateSectionOpen(): Promise<void> {
+    const section = this.page.getByText('State Update', { exact: true }).first();
+    await expect(section).toBeVisible({ timeout: 10_000 });
+    await section.scrollIntoViewIfNeeded();
+    await this.page.waitForTimeout(300);
+
+    // If the "Add state update" button is already visible, section is open
+    const addBtn = this.page.getByRole('button', { name: /add state update/i });
+    const alreadyOpen = await addBtn.isVisible({ timeout: 2_000 }).catch(() => false);
+    if (alreadyOpen) {
+      console.log('✅ State Update section already open');
+      return;
+    }
+
+    // Otherwise, click the expand chevron
+    const expandButton = section.locator('..').locator('button').filter({ has: this.page.locator('svg') }).first()
+      .or(this.page.getByRole('button', { name: /state update/i }).first())
+      .or(section.locator('..').getByRole('button').first());
+    await expandButton.click();
+    await this.page.waitForTimeout(500);
+    console.log('✅ State Update section expanded');
+  }
+
+  /**
+   * In the existing state update, click the X button on the value tag to clear it,
+   * then type a new value. Scrolls to the State Update area first.
+   */
+  async clearStateUpdateValueAndType(newValue: string): Promise<void> {
+    await this.ensureStateUpdateSectionOpen();
+
+    // Find the {{nodeOutput.text}} tag, then its sibling X button
+    const valueTag = this.page.getByText('{{nodeOutput.text}}').first();
+    await valueTag.scrollIntoViewIfNeeded();
+    await this.page.waitForTimeout(300);
+    await expect(valueTag).toBeVisible({ timeout: 10_000 });
+
+    const xButton = valueTag.locator('..').locator('[role="button"]')
+      .filter({ has: this.page.locator('svg.lucide-x') }).first();
+    await expect(xButton).toBeVisible({ timeout: 10_000 });
+    await xButton.click();
+    await this.page.waitForTimeout(500);
+
+    // After clearing the tag, focus stays in the combobox/input area with suggestions.
+    // Just type the new value directly and dismiss the dropdown.
+    await this.page.keyboard.type(newValue, { delay: 50 });
+    await this.page.waitForTimeout(300);
+    await this.page.keyboard.press('Escape');
+    await this.page.waitForTimeout(500);
+    console.log(`✅ State update value cleared and set to: ${newValue}`);
+  }
+
+  /**
+   * Click "Add state update" to add a new row, then fill the variable field.
+   */
+  async addNewStateUpdateVariable(variable: string): Promise<void> {
+    const addBtn = this.page.getByRole('button', { name: /add state update/i });
+    await addBtn.scrollIntoViewIfNeeded();
+    await expect(addBtn).toBeVisible({ timeout: 10_000 });
+    await addBtn.click();
+    await this.page.waitForTimeout(500);
+
+    // The newly added row has an empty input with placeholder "Select variable"
+    const variableField = this.page.getByPlaceholder('Select variable').last();
+    await expect(variableField).toBeVisible({ timeout: 10_000 });
+    await variableField.click();
+    await variableField.fill(variable);
+    await this.page.waitForTimeout(500);
+    console.log(`✅ New state update added with variable: ${variable}`);
+  }
+
+  /**
+   * Assert a state update variable field has the expected value in Browser B.
+   * Uses getByText as the field may render as text or as an input with value.
+   */
+  async expectStateUpdateVariable(expectedVariable: string): Promise<void> {
+    const byInput = this.page.getByPlaceholder('Select variable').filter({ has: this.page.locator(`[value="${expectedVariable}"]`) }).first();
+    const byText = this.page.getByText(expectedVariable);
+    const target = byInput.or(byText).first();
+    await expect(target).toBeVisible({ timeout: 15_000 });
+    console.log(`✅ State update variable verified: ${expectedVariable}`);
+  }
+
+  /**
+   * Expand the Conditions section within a state update (click the "Conditions" or "+ Add condition" button).
+   */
+  async expandConditionsSection(): Promise<void> {
+    const addConditionBtn = this.page.getByRole('button', { name: /add condition/i }).first();
+    await addConditionBtn.scrollIntoViewIfNeeded();
+    await expect(addConditionBtn).toBeVisible({ timeout: 10_000 });
+    await addConditionBtn.click();
+    await this.page.waitForTimeout(500);
+    console.log('✅ Conditions section expanded / condition added');
+  }
+
+  /**
+   * Fill in a condition row: field (Select field input), value (Enter value input).
+   */
+  async fillCondition(options: { field: string; value: string }, index = 0): Promise<void> {
+    const { field, value } = options;
+
+    const fieldInput = this.page.getByPlaceholder('Select field').nth(index);
+    await expect(fieldInput).toBeVisible({ timeout: 10_000 });
+    await fieldInput.click();
+    await fieldInput.clear();
+    await fieldInput.fill(field);
+    await this.page.waitForTimeout(300);
+
+    const valueInput = this.page.getByPlaceholder('Enter value').nth(index);
+    await expect(valueInput).toBeVisible({ timeout: 10_000 });
+    await valueInput.click();
+    await valueInput.clear();
+    await valueInput.fill(value);
+    await this.page.waitForTimeout(500);
+    console.log(`✅ Condition filled: field="${field}", value="${value}"`);
+  }
+
+  /**
+   * Assert a condition's field and value are visible in Browser B.
+   */
+  async expectConditionVisible(options: { field: string; value: string }, index = 0): Promise<void> {
+    const { field, value } = options;
+    const fieldInput = this.page.getByPlaceholder('Select field').nth(index);
+    await expect(fieldInput).toHaveValue(field, { timeout: 15_000 });
+    const valueInput = this.page.getByPlaceholder('Enter value').nth(index);
+    await expect(valueInput).toHaveValue(value, { timeout: 15_000 });
+    console.log(`✅ Condition verified: field="${field}", value="${value}"`);
+  }
+
+  /** Locate the Structured Output toggle by finding the label, then going up to its immediate row. */
+  private get structuredOutputToggle() {
+    return this.page.getByText('Structured Output', { exact: true }).first()
+      .locator('xpath=ancestor::div[contains(@class, "py-3")]')
+      .first()
+      .getByRole('switch');
+  }
+
+  /**
+   * Enable the Structured Output toggle switch.
+   * If already enabled, this is a no-op. Also expands the accordion.
+   */
+  async enableStructuredOutput(): Promise<void> {
+    const toggle = this.structuredOutputToggle;
+    await toggle.scrollIntoViewIfNeeded();
+    await this.page.waitForTimeout(300);
+    await expect(toggle).toBeVisible({ timeout: 10_000 });
+
+    const state = await toggle.getAttribute('data-state');
+    if (state !== 'checked') {
+      await toggle.click();
+      await this.page.waitForTimeout(500);
+      console.log('✅ Structured Output enabled');
+    } else {
+      console.log('✅ Structured Output already enabled');
+    }
+
+    // Expand the accordion section so JSON Schema tab is visible
+    const accordionBtn = this.page.getByText('Structured Output', { exact: true }).first()
+      .locator('xpath=ancestor::button[@data-orientation="vertical"]');
+    const accordionState = await accordionBtn.getAttribute('data-state').catch(() => 'open');
+    if (accordionState === 'closed') {
+      await accordionBtn.click();
+      await this.page.waitForTimeout(500);
+      console.log('✅ Structured Output section expanded');
+    }
+  }
+
+  /**
+   * Assert the Structured Output toggle is enabled in Browser B.
+   */
+  async expectStructuredOutputEnabled(): Promise<void> {
+    const toggle = this.structuredOutputToggle;
+    await toggle.scrollIntoViewIfNeeded();
+    await expect(toggle).toHaveAttribute('data-state', 'checked', { timeout: 15_000 });
+    console.log('✅ Structured Output toggle verified as enabled');
+  }
+
+  /**
+   * Expand the Structured Output accordion and click the JSON Schema tab.
+   * Used on Browser B to make the schema content visible before asserting.
+   */
+  async openJsonSchemaTab(): Promise<void> {
+    const accordionBtn = this.page.getByText('Structured Output', { exact: true }).first()
+      .locator('xpath=ancestor::button[@data-orientation="vertical"]');
+    const accordionState = await accordionBtn.getAttribute('data-state').catch(() => 'open');
+    if (accordionState === 'closed') {
+      await accordionBtn.click();
+      await this.page.waitForTimeout(500);
+      console.log('✅ Structured Output section expanded (Browser B)');
+    }
+
+    const jsonTab = this.page.getByRole('tab', { name: /json schema/i });
+    await jsonTab.scrollIntoViewIfNeeded();
+    await expect(jsonTab).toBeVisible({ timeout: 10_000 });
+    await jsonTab.click();
+    await this.page.waitForTimeout(500);
+    console.log('✅ JSON Schema tab opened (Browser B)');
+  }
+
+  /**
+   * Click the "JSON Schema" tab and replace the editor content with the provided JSON.
+   * The editor is a Monaco editor (not CodeMirror).
+   */
+  async setJsonSchema(jsonContent: string): Promise<void> {
+    const jsonTab = this.page.getByRole('tab', { name: /json schema/i });
+    await jsonTab.scrollIntoViewIfNeeded();
+    await expect(jsonTab).toBeVisible({ timeout: 10_000 });
+    await jsonTab.click();
+    await this.page.waitForTimeout(500);
+
+    const monacoEditor = this.page.locator('.monaco-editor').last();
+    await expect(monacoEditor).toBeVisible({ timeout: 10_000 });
+    await monacoEditor.click();
+    await this.page.waitForTimeout(300);
+
+    await this.page.keyboard.press('ControlOrMeta+a');
+    await this.page.waitForTimeout(200);
+    await this.page.keyboard.press('Backspace');
+    await this.page.waitForTimeout(300);
+
+    await this.page.keyboard.insertText(jsonContent);
+    await this.page.waitForTimeout(500);
+    console.log('✅ JSON Schema content set');
   }
 }

@@ -239,8 +239,20 @@ test.describe('Collaboration - two browsers, same canvas', () => {
       await graphEditorB.agentNode(0).dblclick();
       await expect(pageB.getByRole('region', { name: /instructions/i }).or(pageB.getByRole('button', { name: /close panel/i })).first()).toBeVisible({ timeout: 15_000 });
 
-      // ---------- In Browser A's agent node: change prompt template; changes must reflect in B ----------
+      // ---------- In Browser A's agent node: change TITLE; changes must reflect in B ----------
       const agentPanelA = new AgentNodePanel(pageA);
+      const agentPanelB = new AgentNodePanel(pageB);
+
+      const newTitle = 'CollabTestAgent';
+      await agentPanelA.setAgentTitle(newTitle);
+      await agentPanelB.expectAgentTitle(newTitle);
+
+      // ---------- In Browser A's agent node: change DESCRIPTION; changes must reflect in B ----------
+      const newDescription = 'Collab test agent description';
+      await agentPanelA.setAgentDescription(newDescription);
+      await agentPanelB.expectAgentDescription(newDescription);
+
+      // ---------- In Browser A's agent node: change prompt template; changes must reflect in B ----------
       const promptText = 'you are an ai assistant';
       await agentPanelA.setPromptTemplate(promptText);
       await pageA.waitForTimeout(1000);
@@ -254,6 +266,37 @@ test.describe('Collaboration - two browsers, same canvas', () => {
       await pageA.waitForTimeout(1500);
 
       await expect(pageB.getByText(promptText2)).toBeVisible({ timeout: 15_000 });
+
+      // ---------- In Browser A's agent node: change USER PROMPT; changes must reflect in B ----------
+      const userPromptText = 'What is the weather today?';
+      await agentPanelA.setUserPrompt(userPromptText);
+      await pageA.waitForTimeout(1000);
+
+      await expect(pageB.getByText(userPromptText)).toBeVisible({ timeout: 15_000 });
+
+      // ---------- In Browser A's agent node: STATE UPDATE — clear value tag and type new value ----------
+      await agentPanelA.clearStateUpdateValueAndType('pip');
+      await agentPanelB.ensureStateUpdateSectionOpen();
+      // Value may appear as input value or as text
+      const pipByText = pageB.getByText('pip', { exact: true });
+      const pipByInput = pageB.locator('input[value="pip"]');
+      await expect(pipByText.or(pipByInput).first()).toBeVisible({ timeout: 15_000 });
+
+      // ---------- In Browser A's agent node: STRUCTURED OUTPUT — enable toggle, set JSON schema ----------
+      await agentPanelA.enableStructuredOutput();
+      await agentPanelB.expectStructuredOutputEnabled();
+
+      const testSchema = '{"type":"object","properties":{"TestParam":{"type":"string"}},"required":[],"additionalProperties":false}';
+      await agentPanelA.setJsonSchema(testSchema);
+
+      await agentPanelB.openJsonSchemaTab();
+      await expect(pageB.getByText('TestParam')).toBeVisible({ timeout: 15_000 });
+
+      // ---------- In Browser A's agent node: change MODEL (last — dropdown closes the panel) ----------
+      const newModel = 'OpenAI GPT-4.1';
+      await agentPanelA.changeModel(newModel);
+      await agentPanelB.expectModel(newModel);
+
       await pageA.waitForTimeout(3000);
       await pageB.waitForTimeout(3000);
     } finally {
